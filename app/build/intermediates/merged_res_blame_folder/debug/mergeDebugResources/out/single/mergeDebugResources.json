@@ -1,15 +1,23 @@
 [
     {
-        "merged": "com.example.saferouteapp-debug-36:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "com.example.saferouteapp-main-38:/mipmap-mdpi/ic_launcher_round.webp"
-    },
-    {
         "merged": "com.example.saferouteapp-debug-36:/drawable_splash_screen.xml.flat",
         "source": "com.example.saferouteapp-main-38:/drawable/splash_screen.xml"
     },
     {
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_alert_vehicle.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_alert_vehicle.xml"
+    },
+    {
         "merged": "com.example.saferouteapp-debug-36:/drawable_ic_origin_marker.xml.flat",
         "source": "com.example.saferouteapp-main-38:/drawable/ic_origin_marker.xml"
+    },
+    {
+        "merged": "com.example.saferouteapp-debug-36:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.saferouteapp-main-38:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_pedestrian.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_pedestrian.xml"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/layout_activity_login.xml.flat",
@@ -20,12 +28,24 @@
         "source": "com.example.saferouteapp-main-38:/mipmap-xxxhdpi/ic_launcher_round.webp"
     },
     {
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_safe_route.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_safe_route.xml"
+    },
+    {
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_vehicle.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_vehicle.xml"
+    },
+    {
         "merged": "com.example.saferouteapp-debug-36:/drawable_ic_launcher_foreground.xml.flat",
         "source": "com.example.saferouteapp-main-38:/drawable/ic_launcher_foreground.xml"
     },
     {
-        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_safe_route.xml.flat",
-        "source": "com.example.saferouteapp-main-38:/drawable/ic_safe_route.xml"
+        "merged": "com.example.saferouteapp-debug-36:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.saferouteapp-main-38:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_my_location.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_my_location.xml"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/mipmap-anydpi-v26_ic_launcher.xml.flat",
@@ -54,6 +74,10 @@
     {
         "merged": "com.example.saferouteapp-debug-36:/mipmap-xhdpi_ic_launcher.webp.flat",
         "source": "com.example.saferouteapp-main-38:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.saferouteapp-debug-36:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.saferouteapp-main-38:/mipmap-hdpi/ic_launcher_foreground.webp"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/drawable_ic_launcher_background.xml.flat",
@@ -112,8 +136,8 @@
         "source": "com.example.saferouteapp-main-38:/drawable/ic_saferoute_logo.xml"
     },
     {
-        "merged": "com.example.saferouteapp-debug-36:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "com.example.saferouteapp-main-38:/mipmap-mdpi/ic_launcher.webp"
+        "merged": "com.example.saferouteapp-debug-36:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "com.example.saferouteapp-main-38:/mipmap-xhdpi/ic_launcher_foreground.webp"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/drawable_ic_hospital.xml.flat",
@@ -138,5 +162,9 @@
     {
         "merged": "com.example.saferouteapp-debug-36:/layout_activity_register.xml.flat",
         "source": "com.example.saferouteapp-main-38:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_alert_pedestrian.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_alert_pedestrian.xml"
     }
 ]

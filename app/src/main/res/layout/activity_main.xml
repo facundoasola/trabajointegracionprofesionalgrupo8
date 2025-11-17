@@ -50,13 +50,13 @@
         android:layout_marginBottom="250dp"
         android:orientation="vertical">
 
-        <!-- Filtro para crímenes en vía pública -->
+        <!-- Filtro para crímenes en vía pública (Transeúntes) -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/street_crime_filter_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_alert_warning"
-            app:backgroundTint="#FF5722"
+            android:src="@drawable/ic_pedestrian"
+            app:backgroundTint="#F44336"
             app:fabSize="mini"
             app:tint="@android:color/white"
             android:layout_marginBottom="8dp" />
@@ -66,19 +66,8 @@
             android:id="@+id/vehicle_crime_filter_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_alert_warning"
+            android:src="@drawable/ic_vehicle"
             app:backgroundTint="#9C27B0"
-            app:fabSize="mini"
-            app:tint="@android:color/white"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Mostrar todas las zonas de peligro -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/danger_zones_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_alert_warning"
-            app:backgroundTint="#FF9800"
             app:fabSize="mini"
             app:tint="@android:color/white"
             android:layout_marginBottom="8dp" />
@@ -313,6 +302,42 @@
                 android:layout_height="24dp"
                 android:src="@android:drawable/radiobutton_off_background"
                 android:layout_marginStart="8dp"/>
+
+        </LinearLayout>
+
+        <!-- Botones de Exportar a Apps de Transporte -->
+        <LinearLayout
+            android:id="@+id/export_buttons_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:baselineAligned="false">
+
+            <Button
+                android:id="@+id/export_uber_button"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Exportar a Uber"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#000000"
+                android:layout_marginEnd="4dp"
+                android:textAllCaps="false"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/export_pedidosya_button"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Exportar a Pedidos Ya"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#FF0000"
+                android:layout_marginStart="4dp"
+                android:textAllCaps="false"
+                android:textSize="14sp" />
 
         </LinearLayout>
 

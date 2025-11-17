@@ -4,7 +4,7 @@
             "outputFile": "com.example.saferouteapp-mergeDebugResources-34:/values-it/values-it.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\walte\\.gradle\\caches\\9.0-milestone-1\\transforms\\06b8963b9679001fc11fba3efd551743\\transformed\\material-1.9.0\\res\\values-it\\values-it.xml",
+                    "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\74170f345689157344f433b5912e98f5\\transformed\\material-1.9.0\\res\\values-it\\values-it.xml",
                     "from": {
                         "startLines": "2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -23,24 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\walte\\.gradle\\caches\\9.0-milestone-1\\transforms\\7c15a7fbedc20fa80f701c1ba3143b3d\\transformed\\osmdroid-android-6.1.14\\res\\values-it\\values-it.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,94,202,256,298,346,403,445",
-                        "endColumns": "38,107,53,41,47,56,41,47",
-                        "endOffsets": "89,197,251,293,341,398,440,488"
-                    },
-                    "to": {
-                        "startLines": "33,34,43,46,49,99,103,104",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "3012,3051,3917,4132,4321,8261,8581,8623",
-                        "endColumns": "38,107,53,41,47,56,41,47",
-                        "endOffsets": "3046,3154,3966,4169,4364,8313,8618,8666"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\walte\\.gradle\\caches\\9.0-milestone-1\\transforms\\8dc8707a98f9b5dc491381452475f5d5\\transformed\\appcompat-1.6.1\\res\\values-it\\values-it.xml",
+                    "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\6eea19db4dc1c4d1790d2bb6b56a7ad9\\transformed\\appcompat-1.6.1\\res\\values-it\\values-it.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -57,7 +40,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\walte\\.gradle\\caches\\9.0-milestone-1\\transforms\\fa27e44502eabc78445f102ec78cef15\\transformed\\core-1.9.0\\res\\values-it\\values-it.xml",
+                    "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\c8253b9cdb76ccdadb82a6d650dc64c0\\transformed\\core-1.9.0\\res\\values-it\\values-it.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -71,6 +54,23 @@
                         "startOffsets": "8480",
                         "endColumns": "100",
                         "endOffsets": "8576"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\120ccacd25b2656dbb518c97eb1eaf64\\transformed\\osmdroid-android-6.1.14\\res\\values-it\\values-it.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,94,202,256,298,346,403,445",
+                        "endColumns": "38,107,53,41,47,56,41,47",
+                        "endOffsets": "89,197,251,293,341,398,440,488"
+                    },
+                    "to": {
+                        "startLines": "33,34,43,46,49,99,103,104",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "3012,3051,3917,4132,4321,8261,8581,8623",
+                        "endColumns": "38,107,53,41,47,56,41,47",
+                        "endOffsets": "3046,3154,3966,4169,4364,8313,8618,8666"
                     }
                 }
             ]

@@ -1,3 +1,0 @@
-com.example.saferouteapp.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme

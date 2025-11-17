@@ -1,40 +1,40 @@
-com.example.saferouteapp-coordinatorlayout-1.1.0-0 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\059c65be2d11e7dc0a06ae2903ff2784\transformed\coordinatorlayout-1.1.0\res
-com.example.saferouteapp-material-1.9.0-1 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\06b8963b9679001fc11fba3efd551743\transformed\material-1.9.0\res
-com.example.saferouteapp-activity-ktx-1.7.2-2 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\0c3822e47412c708fc840f5ccc432ba0\transformed\activity-ktx-1.7.2\res
-com.example.saferouteapp-savedstate-1.2.1-3 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\213248ee824289b704d95095cb925947\transformed\savedstate-1.2.1\res
-com.example.saferouteapp-lifecycle-viewmodel-2.6.1-4 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\28bdfc454ca4c0f2befd5c917aaa7ff1\transformed\lifecycle-viewmodel-2.6.1\res
-com.example.saferouteapp-appcompat-resources-1.6.1-5 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\28c964db9942b24bdff384711f18122e\transformed\appcompat-resources-1.6.1\res
-com.example.saferouteapp-profileinstaller-1.3.0-6 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\2eca5f2c26cdc662e6dca2358fc6b4f5\transformed\profileinstaller-1.3.0\res
-com.example.saferouteapp-annotation-experimental-1.3.0-7 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\309251718d2e7e4a2e68e60b34640709\transformed\annotation-experimental-1.3.0\res
-com.example.saferouteapp-emoji2-1.2.0-8 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\46279068a0dcbe0e9e7e96aba675bfa8\transformed\emoji2-1.2.0\res
-com.example.saferouteapp-lifecycle-viewmodel-ktx-2.6.1-9 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\5d1cb0644bfa3d1150161b107f114b60\transformed\lifecycle-viewmodel-ktx-2.6.1\res
-com.example.saferouteapp-lifecycle-livedata-2.6.1-10 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\64a451bca3b613667877bf9ca9953a9f\transformed\lifecycle-livedata-2.6.1\res
-com.example.saferouteapp-lifecycle-process-2.6.1-11 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\6bf5a311d36fec1d7b689e5ccee5c65e\transformed\lifecycle-process-2.6.1\res
-com.example.saferouteapp-activity-1.7.2-12 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\6edd490c4f8e7eccdafdc83cdbb3d9e6\transformed\activity-1.7.2\res
-com.example.saferouteapp-lifecycle-runtime-ktx-2.6.1-13 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\713909c8036e34323c99de846a3d3c6d\transformed\lifecycle-runtime-ktx-2.6.1\res
-com.example.saferouteapp-cardview-1.0.0-14 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\765a2e70580e084e4323755e47d7f6ba\transformed\cardview-1.0.0\res
-com.example.saferouteapp-osmdroid-android-6.1.14-15 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\7c15a7fbedc20fa80f701c1ba3143b3d\transformed\osmdroid-android-6.1.14\res
-com.example.saferouteapp-savedstate-ktx-1.2.1-16 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\7d6d8f2e384ce6fbac2ed8e0c6e3b540\transformed\savedstate-ktx-1.2.1\res
-com.example.saferouteapp-startup-runtime-1.1.1-17 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\85559c4e2744d8964582f41098b1309d\transformed\startup-runtime-1.1.1\res
-com.example.saferouteapp-drawerlayout-1.1.1-18 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\8cc90bea85a253f982a118aeb852bd3e\transformed\drawerlayout-1.1.1\res
-com.example.saferouteapp-appcompat-1.6.1-19 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\8dc8707a98f9b5dc491381452475f5d5\transformed\appcompat-1.6.1\res
-com.example.saferouteapp-emoji2-views-helper-1.2.0-20 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\8fc10bb1e1fc396a6bb6ecbe8f80a4b1\transformed\emoji2-views-helper-1.2.0\res
-com.example.saferouteapp-core-runtime-2.2.0-21 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\98b626e77dcb600b5bbfe10275aaa4dc\transformed\core-runtime-2.2.0\res
-com.example.saferouteapp-viewpager2-1.0.0-22 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\996eb9e971f6d3070c0f0311982f78a0\transformed\viewpager2-1.0.0\res
-com.example.saferouteapp-fragment-1.3.6-23 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\a5cb9b9e94989eacf751fc0e1be1173c\transformed\fragment-1.3.6\res
-com.example.saferouteapp-constraintlayout-2.1.4-24 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\b0f52141733da54eeb3b94e0c0f6c529\transformed\constraintlayout-2.1.4\res
-com.example.saferouteapp-lifecycle-livedata-core-2.6.1-25 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\b35cf0ee0f53f864dd82dbcdf161f60f\transformed\lifecycle-livedata-core-2.6.1\res
-com.example.saferouteapp-transition-1.2.0-26 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\b9c9887d5991f47ca866fe9dcd6d53e3\transformed\transition-1.2.0\res
-com.example.saferouteapp-recyclerview-1.1.0-27 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\e5d5c3eb2f0a6e3c4505969954da3535\transformed\recyclerview-1.1.0\res
-com.example.saferouteapp-lifecycle-viewmodel-savedstate-2.6.1-28 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\e92f18e01134c37c6d4d0727e9420ede\transformed\lifecycle-viewmodel-savedstate-2.6.1\res
-com.example.saferouteapp-core-ktx-1.9.0-29 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\ef1a18cbe4fe685230c29a7943ce8f8e\transformed\core-ktx-1.9.0\res
-com.example.saferouteapp-lifecycle-runtime-2.6.1-30 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\f23cd6a77b4e9d5d3ccfee7916262496\transformed\lifecycle-runtime-2.6.1\res
-com.example.saferouteapp-core-1.9.0-31 C:\Users\walte\.gradle\caches\9.0-milestone-1\transforms\fa27e44502eabc78445f102ec78cef15\transformed\core-1.9.0\res
-com.example.saferouteapp-pngs-32 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\build\generated\res\pngs\debug
-com.example.saferouteapp-resValues-33 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\build\generated\res\resValues\debug
-com.example.saferouteapp-updated_navigation_xml-34 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\build\generated\updated_navigation_xml\debug
-com.example.saferouteapp-packageDebugResources-35 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.example.saferouteapp-packageDebugResources-36 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.example.saferouteapp-debug-37 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.example.saferouteapp-debug-38 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\src\debug\res
-com.example.saferouteapp-main-39 C:\Users\walte\OneDrive\Desktop\Repo\TrabajoFinal-master\app\src\main\res
+com.example.saferouteapp-cardview-1.0.0-0 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\03ab205ffe3c7ee0f3ce2ce40b77cc68\transformed\cardview-1.0.0\res
+com.example.saferouteapp-activity-ktx-1.7.2-1 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\0eb09009b344ab2739bfdadc3464ff10\transformed\activity-ktx-1.7.2\res
+com.example.saferouteapp-osmdroid-android-6.1.14-2 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\120ccacd25b2656dbb518c97eb1eaf64\transformed\osmdroid-android-6.1.14\res
+com.example.saferouteapp-savedstate-1.2.1-3 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\36daffe35dbfab45212fc9f9d1f19da7\transformed\savedstate-1.2.1\res
+com.example.saferouteapp-lifecycle-viewmodel-savedstate-2.6.1-4 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\3716d658d66163311a72f6543e1d2ca6\transformed\lifecycle-viewmodel-savedstate-2.6.1\res
+com.example.saferouteapp-lifecycle-livedata-core-2.6.1-5 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\4cd1e5040dc5f823f2890ef236054468\transformed\lifecycle-livedata-core-2.6.1\res
+com.example.saferouteapp-emoji2-1.2.0-6 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\54ac9086b230a6e99595c427151fc620\transformed\emoji2-1.2.0\res
+com.example.saferouteapp-emoji2-views-helper-1.2.0-7 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\5f064e7fd3565f5b3ba299f5400948b3\transformed\emoji2-views-helper-1.2.0\res
+com.example.saferouteapp-lifecycle-livedata-2.6.1-8 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\60fcbd0f3879b06cc1996122c4c7c70c\transformed\lifecycle-livedata-2.6.1\res
+com.example.saferouteapp-lifecycle-runtime-2.6.1-9 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\68eb55d97e9da8b22016472266a10209\transformed\lifecycle-runtime-2.6.1\res
+com.example.saferouteapp-appcompat-1.6.1-10 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\6eea19db4dc1c4d1790d2bb6b56a7ad9\transformed\appcompat-1.6.1\res
+com.example.saferouteapp-material-1.9.0-11 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\74170f345689157344f433b5912e98f5\transformed\material-1.9.0\res
+com.example.saferouteapp-appcompat-resources-1.6.1-12 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\7736da1c6882ac0a396d2d49578aecd6\transformed\appcompat-resources-1.6.1\res
+com.example.saferouteapp-core-runtime-2.2.0-13 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\7fca572646129a89596b3a49706b4b4e\transformed\core-runtime-2.2.0\res
+com.example.saferouteapp-activity-1.7.2-14 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\80e7504044e52b50ddad24c027d5bee4\transformed\activity-1.7.2\res
+com.example.saferouteapp-transition-1.2.0-15 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\833d53e472ada9d9ef70b6adb11bc60e\transformed\transition-1.2.0\res
+com.example.saferouteapp-startup-runtime-1.1.1-16 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e00fda78cd4daa26a201ab41dfd6411\transformed\startup-runtime-1.1.1\res
+com.example.saferouteapp-savedstate-ktx-1.2.1-17 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\982c3f4d651f9723340c49a665e6575f\transformed\savedstate-ktx-1.2.1\res
+com.example.saferouteapp-lifecycle-viewmodel-2.6.1-18 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\9b68bb53aedaeb12885544136e56ea02\transformed\lifecycle-viewmodel-2.6.1\res
+com.example.saferouteapp-profileinstaller-1.3.0-19 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\a3af8c03b1823a4658eef031eb8f2411\transformed\profileinstaller-1.3.0\res
+com.example.saferouteapp-lifecycle-runtime-ktx-2.6.1-20 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\b3f63e6300fe3d9680a427072a4dcc20\transformed\lifecycle-runtime-ktx-2.6.1\res
+com.example.saferouteapp-drawerlayout-1.1.1-21 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\b4117cf384fc2b6693c2ae8b1a50b23d\transformed\drawerlayout-1.1.1\res
+com.example.saferouteapp-annotation-experimental-1.3.0-22 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\bfa40a91b00cef48c34b2cb18f06ed32\transformed\annotation-experimental-1.3.0\res
+com.example.saferouteapp-core-1.9.0-23 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\c8253b9cdb76ccdadb82a6d650dc64c0\transformed\core-1.9.0\res
+com.example.saferouteapp-viewpager2-1.0.0-24 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\cca96dd2f12b2dc5ab54a6182d9ea2b5\transformed\viewpager2-1.0.0\res
+com.example.saferouteapp-recyclerview-1.1.0-25 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\cd8e9fa76bcc837fe45e88d9d6fa66d3\transformed\recyclerview-1.1.0\res
+com.example.saferouteapp-lifecycle-viewmodel-ktx-2.6.1-26 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d4edc6fa0aab7f7b74af365e53d90b0f\transformed\lifecycle-viewmodel-ktx-2.6.1\res
+com.example.saferouteapp-fragment-1.3.6-27 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d869f44fb45d8cfe28cba44d34a140ca\transformed\fragment-1.3.6\res
+com.example.saferouteapp-coordinatorlayout-1.1.0-28 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d9a5a9ba1e2d59eedd6f256d9fd56435\transformed\coordinatorlayout-1.1.0\res
+com.example.saferouteapp-core-ktx-1.9.0-29 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\dd07ceb4621a0c3d39a775da8c77e1ce\transformed\core-ktx-1.9.0\res
+com.example.saferouteapp-constraintlayout-2.1.4-30 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e80498510da49802fa38a4a6d2a74bf6\transformed\constraintlayout-2.1.4\res
+com.example.saferouteapp-lifecycle-process-2.6.1-31 C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\eb7aa4c330ce4f50c42c018f4249d721\transformed\lifecycle-process-2.6.1\res
+com.example.saferouteapp-pngs-32 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\build\generated\res\pngs\debug
+com.example.saferouteapp-resValues-33 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\build\generated\res\resValues\debug
+com.example.saferouteapp-updated_navigation_xml-34 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\build\generated\updated_navigation_xml\debug
+com.example.saferouteapp-packageDebugResources-35 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.saferouteapp-packageDebugResources-36 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.saferouteapp-debug-37 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.saferouteapp-debug-38 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\debug\res
+com.example.saferouteapp-main-39 C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\res

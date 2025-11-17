@@ -1398,6 +1398,7 @@ color foreground_material_light
 color highlighted_text_material_dark
 color highlighted_text_material_light
 color ic_launcher_background
+color ic_launcher_background2
 color m3_appbar_overlay_color
 color m3_assist_chip_icon_tint_color
 color m3_assist_chip_stroke_color
@@ -2928,6 +2929,8 @@ drawable design_ic_visibility
 drawable design_ic_visibility_off
 drawable design_password_eye
 drawable design_snackbar_background
+drawable ic_alert_pedestrian
+drawable ic_alert_vehicle
 drawable ic_alert_warning
 drawable ic_arrow_back_24
 drawable ic_arrow_back_black_24
@@ -2950,13 +2953,16 @@ drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
+drawable ic_my_location
 drawable ic_origin_marker
+drawable ic_pedestrian
 drawable ic_police_station
 drawable ic_report_crime
 drawable ic_safe_route
 drawable ic_saferoute_logo
 drawable ic_search_black_24
 drawable ic_sos_24
+drawable ic_vehicle
 drawable ic_zoom_in
 drawable ic_zoom_out
 drawable m3_appbar_background
@@ -3162,6 +3168,7 @@ id cache_measures
 id callMeasure
 id cancel_button
 id carryVelocity
+id category_spinner
 id center
 id centerCrop
 id centerInside
@@ -3197,7 +3204,6 @@ id currentState
 id custom
 id customPanel
 id cut
-id danger_zones_button
 id date_picker_actions
 id decelerate
 id decelerateAndComplete
@@ -3244,6 +3250,9 @@ id enterAlwaysCollapsed
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
+id export_buttons_layout
+id export_pedidosya_button
+id export_uber_button
 id fade
 id fast_route_info
 id fast_route_option
@@ -3287,7 +3296,7 @@ id ignoreRequest
 id image
 id image_selected_text
 id immediateStop
-id incident_input
+id incident_description_input
 id included
 id indeterminate
 id info
@@ -3473,6 +3482,7 @@ id select_dialog_listview
 id select_image_button
 id selected
 id selection_type
+id severity_info_text
 id sharedValueSet
 id sharedValueUnset
 id shortcut
@@ -3507,9 +3517,11 @@ id startVertical
 id staticLayout
 id staticPostLayout
 id stop
+id street_crime_filter_button
 id stretch
 id submenuarrow
 id submit_area
+id subtype_spinner
 id supportScrollUp
 id tabMode
 id tag_accessibility_actions
@@ -3563,6 +3575,8 @@ id uniform
 id unlabeled
 id up
 id useLogo
+id vehicle_crime_filter_button
+id vehicle_route_button
 id vertical_only
 id view_offset_helper
 id view_transition
@@ -3779,6 +3793,7 @@ layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
 mipmap ic_launcher
+mipmap ic_launcher_foreground
 mipmap ic_launcher_round
 plurals mtrl_badge_content_description
 string abc_action_bar_home_description

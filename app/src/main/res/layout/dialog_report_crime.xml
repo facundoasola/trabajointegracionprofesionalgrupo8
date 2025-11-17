@@ -30,19 +30,50 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="📂 Categoría del delito"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <Spinner
+            android:id="@+id/category_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="🚨 Tipo de incidente"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
-        <EditText
-            android:id="@+id/incident_input"
+        <Spinner
+            android:id="@+id/subtype_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ej: Robo de celular, Asalto, Hurto, etc."
-            android:inputType="text"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/severity_info_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gravedad: Se asignará automáticamente"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/incident_description_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descripción adicional del incidente (opcional)"
+            android:inputType="textMultiLine"
             android:maxLines="3"
+            android:minLines="2"
             android:layout_marginBottom="16dp"/>
 
         <TextView

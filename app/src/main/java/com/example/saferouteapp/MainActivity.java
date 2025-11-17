@@ -6,6 +6,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -35,6 +36,9 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.Polygon;
+import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -54,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private Button routeButton, vehicleRouteButton;
     private ImageButton backButton;
     private Marker originMarker, destinationMarker;
-    private FloatingActionButton menuButton, zoomInButton, zoomOutButton, dangerZonesButton,
+    private FloatingActionButton menuButton, zoomInButton, zoomOutButton,
             streetCrimeFilterButton, vehicleCrimeFilterButton;
     private Button reportCrimeButton;
 
@@ -62,8 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
     private LinearLayout routeInfoLayout, searchLayout;
     private LinearLayout safeRouteOption, fastRouteOption;
+    private LinearLayout exportButtonsLayout;
     private TextView safeRouteInfo, fastRouteInfo;
     private ImageView fastRouteRadio;
+    private Button exportUberButton, exportPedidosYaButton;
 
     private final List<Polyline> routeOverlays = new ArrayList<>();
     private final String GRAPHHOPPER_API_KEY = "34f7e5c8-bf47-4cb5-99e4-24d04d61ef0f";
@@ -76,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
     // Variables para filtros de crimen
     private boolean showStreetCrime = true;
     private boolean showVehicleCrime = true;
-    private boolean showAllCrimes = true;
     private boolean vehicleMode = false; // Modo vehículo para rutas específicas
 
     private static class SafePoint {
@@ -96,16 +101,45 @@ public class MainActivity extends AppCompatActivity {
         final String description;
         final String address; // Dirección que será geocodificada
         final String timeAgo;
-        final String crimeType; // Tipo de crimen
+        final String crimeType; // Tipo de crimen (mantener para compatibilidad)
+        final String category; // "Delitos contra las personas" o "Delitos contra la propiedad"
+        final String subType; // Subtipo específico del crimen
+        final int severity; // Gravedad: 1 (leve) a 4 (grave)
         GeoPoint location; // Se establecerá después de la geocodificación
 
-        CrimeAlert(String title, String description, String address, String timeAgo, String crimeType) {
+        CrimeAlert(String title, String description, String address, String timeAgo, String crimeType, 
+                   String category, String subType, int severity) {
             this.title = title;
             this.description = description;
             this.address = address;
             this.timeAgo = timeAgo;
             this.crimeType = crimeType;
+            this.category = category;
+            this.subType = subType;
+            this.severity = severity;
             this.location = null; // Se establecerá más tarde
+        }
+        
+        // Método auxiliar para obtener el color según la gravedad
+        int getSeverityColor() {
+            switch (severity) {
+                case 4: return Color.parseColor("#8B0000"); // Rojo oscuro - Muy grave
+                case 3: return Color.parseColor("#FF0000"); // Rojo - Grave
+                case 2: return Color.parseColor("#FFA500"); // Naranja - Moderado
+                case 1: return Color.parseColor("#FFD700"); // Amarillo - Leve
+                default: return Color.parseColor("#FFA500"); // Por defecto naranja
+            }
+        }
+        
+        // Método para obtener el texto de la gravedad
+        String getSeverityText() {
+            switch (severity) {
+                case 4: return "Muy Grave";
+                case 3: return "Grave";
+                case 2: return "Moderado";
+                case 1: return "Leve";
+                default: return "Desconocido";
+            }
         }
     }
 
@@ -116,6 +150,10 @@ public class MainActivity extends AppCompatActivity {
     private final List<Polygon> dangerZones = new ArrayList<>();
     private final List<Polygon> dangerZoneOverlays = new ArrayList<>();
     private boolean showDangerZones = false;
+    
+    // Ubicación actual del usuario (hardcodeada)
+    private final GeoPoint currentUserLocation = new GeoPoint(-34.595183687496146, -58.3811805650211); // Av. Santa Fe 995, Buenos Aires
+    private Marker userLocationMarker;
 
 
     private static class RouteInfo {
@@ -151,14 +189,34 @@ public class MainActivity extends AppCompatActivity {
         map.setTileSource(mapboxTileSource);
 
         map.setMultiTouchControls(true);
+        
+        // Configurar listener para tap en el mapa
+        MapEventsReceiver mapEventsReceiver = new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                setDestinationFromMapTap(p);
+                return true;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        };
+        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(mapEventsReceiver);
+        map.getOverlays().add(0, mapEventsOverlay); // Agregar como primer overlay
 
         IMapController mapController = map.getController();
-        mapController.setZoom(15.0); // Zoom inicial más amplio, se ajustará automáticamente
-        // Centro inicial en Buenos Aires, se recentrará cuando se carguen las alertas
-        mapController.setCenter(new GeoPoint(-34.6037, -58.3816));
+        mapController.setZoom(16.0); // Zoom para ver bien la ubicación del usuario
+        // Centro inicial en la ubicación del usuario
+        mapController.setCenter(currentUserLocation);
 
         originEditText = findViewById(R.id.origin_text);
         destinationEditText = findViewById(R.id.destination_text);
+        
+        // Configurar hint para mostrar la ubicación actual
+        originEditText.setHint("📍 Ubicación actual (Av. Santa Fe 995)");
+        
         routeButton = findViewById(R.id.route_button);
         vehicleRouteButton = findViewById(R.id.vehicle_route_button);
         routeInfoLayout = findViewById(R.id.route_info_layout);
@@ -173,17 +231,26 @@ public class MainActivity extends AppCompatActivity {
         backButton = findViewById(R.id.back_button);
         zoomInButton = findViewById(R.id.zoom_in_button);
         zoomOutButton = findViewById(R.id.zoom_out_button);
-        dangerZonesButton = findViewById(R.id.danger_zones_button);
         streetCrimeFilterButton = findViewById(R.id.street_crime_filter_button);
         vehicleCrimeFilterButton = findViewById(R.id.vehicle_crime_filter_button);
+        
+        // Inicializar layout y botones de exportar
+        exportButtonsLayout = findViewById(R.id.export_buttons_layout);
+        exportUberButton = findViewById(R.id.export_uber_button);
+        exportPedidosYaButton = findViewById(R.id.export_pedidosya_button);
 
 
         routeButton.setOnClickListener(v -> {
-            String originAddress = originEditText.getText().toString();
-            String destinationAddress = destinationEditText.getText().toString();
+            String originAddress = originEditText.getText().toString().trim();
+            String destinationAddress = destinationEditText.getText().toString().trim();
 
-            if (originAddress.isEmpty() || destinationAddress.isEmpty()) {
-                Toast.makeText(this, "Por favor, ingresa un origen y un destino", Toast.LENGTH_SHORT).show();
+            // Si el origen está vacío, usar la ubicación actual
+            if (originAddress.isEmpty()) {
+                originAddress = "Av. Santa Fe 995, Buenos Aires, Argentina";
+            }
+            
+            if (destinationAddress.isEmpty()) {
+                Toast.makeText(this, "Por favor, ingresa un destino", Toast.LENGTH_SHORT).show();
                 return;
             }
             vehicleMode = false;
@@ -192,11 +259,16 @@ public class MainActivity extends AppCompatActivity {
         });
         
         vehicleRouteButton.setOnClickListener(v -> {
-            String originAddress = originEditText.getText().toString();
-            String destinationAddress = destinationEditText.getText().toString();
+            String originAddress = originEditText.getText().toString().trim();
+            String destinationAddress = destinationEditText.getText().toString().trim();
 
-            if (originAddress.isEmpty() || destinationAddress.isEmpty()) {
-                Toast.makeText(this, "Por favor, ingresa un origen y un destino", Toast.LENGTH_SHORT).show();
+            // Si el origen está vacío, usar la ubicación actual
+            if (originAddress.isEmpty()) {
+                originAddress = "Av. Santa Fe 995, Buenos Aires, Argentina";
+            }
+            
+            if (destinationAddress.isEmpty()) {
+                Toast.makeText(this, "Por favor, ingresa un destino", Toast.LENGTH_SHORT).show();
                 return;
             }
             vehicleMode = true;
@@ -207,6 +279,10 @@ public class MainActivity extends AppCompatActivity {
         // Configurar listeners para las opciones de ruta
         safeRouteOption.setOnClickListener(v -> selectRouteType(true));
         fastRouteOption.setOnClickListener(v -> selectRouteType(false));
+        
+        // Configurar listeners para botones de exportar
+        exportUberButton.setOnClickListener(v -> exportToUber());
+        exportPedidosYaButton.setOnClickListener(v -> exportToPedidosYa());
 
         menuButton.setOnClickListener(v -> Toast.makeText(this, "Botón de Menú presionado", Toast.LENGTH_SHORT).show());
         reportCrimeButton.setOnClickListener(v -> showReportCrimeDialog());
@@ -215,26 +291,26 @@ public class MainActivity extends AppCompatActivity {
 
         zoomInButton.setOnClickListener(v -> map.getController().zoomIn());
         zoomOutButton.setOnClickListener(v -> map.getController().zoomOut());
-
-        dangerZonesButton.setOnClickListener(v -> toggleDangerZones());
         
         streetCrimeFilterButton.setOnClickListener(v -> toggleStreetCrimeFilter());
         vehicleCrimeFilterButton.setOnClickListener(v -> toggleVehicleCrimeFilter());
 
+        // Agregar marcador de ubicación actual del usuario
+        addUserLocationMarker();
+        
         setupSafePoints();
         addSafePointsToMap();
         setupCrimeAlerts();
         addCrimeAlertsToMap();
         
         // Inicializar filtros y botones
-        showAllCrimes = true;
         showStreetCrime = true;
         showVehicleCrime = true;
         updateCrimeFilterButtons();
         
-        // Crear zonas de peligro automáticamente para que el algoritmo funcione correctamente
+        // Marcar que las zonas de peligro deben mostrarse
         showDangerZones = true;
-        createDangerZones();
+        // Las zonas se crearán después de geocodificar las alertas en addCrimeAlertsToMap()
 
         // Configurar manejo moderno del botón atrás
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -250,6 +326,99 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void addUserLocationMarker() {
+        // Crear marcador para la ubicación actual del usuario
+        userLocationMarker = new Marker(map);
+        userLocationMarker.setPosition(currentUserLocation);
+        userLocationMarker.setTitle("Tu ubicación");
+        userLocationMarker.setSnippet("Av. Santa Fe 995, Buenos Aires");
+        userLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        
+        // Usar el icono personalizado de ubicación
+        Drawable userLocationIcon = ContextCompat.getDrawable(this, R.drawable.ic_my_location);
+        userLocationMarker.setIcon(userLocationIcon);
+        
+        // Hacer que el marcador sea más visible
+        userLocationMarker.setAlpha(1.0f);
+        
+        // Agregar el marcador al mapa
+        map.getOverlays().add(userLocationMarker);
+        
+        // Animar el marcador (efecto de pulso)
+        startLocationMarkerAnimation();
+    }
+    
+    private void startLocationMarkerAnimation() {
+        // Crear un efecto de pulso simple usando un Handler (luz que prende y apaga)
+        final android.os.Handler handler = new android.os.Handler();
+        final Runnable pulseRunnable = new Runnable() {
+            boolean growing = true;
+            float alpha = 1.0f;
+            
+            @Override
+            public void run() {
+                if (userLocationMarker != null) {
+                    if (growing) {
+                        alpha += 0.05f;
+                        if (alpha >= 1.0f) {
+                            alpha = 1.0f;
+                            growing = false;
+                        }
+                    } else {
+                        alpha -= 0.05f;
+                        if (alpha <= 0.6f) {
+                            alpha = 0.6f;
+                            growing = true;
+                        }
+                    }
+                    userLocationMarker.setAlpha(alpha);
+                    map.invalidate();
+                    handler.postDelayed(this, 50);
+                }
+            }
+        };
+        handler.post(pulseRunnable);
+    }
+    
+    private void startCrimeAlertAnimation(Marker marker) {
+        // Crear animación de transparencia fluida para alertas de crimen
+        final android.os.Handler handler = new android.os.Handler();
+        final Runnable fadeRunnable = new Runnable() {
+            float alpha = 1.0f;
+            boolean fading = false;
+            
+            @Override
+            public void run() {
+                if (marker != null && map.getOverlays().contains(marker)) {
+                    // Animación de transparencia suave (100% a 50%)
+                    if (!fading) {
+                        // Desvanecer de 1.0 a 0.5
+                        alpha -= 0.01f;
+                        if (alpha <= 0.5f) {
+                            alpha = 0.5f;
+                            fading = true;
+                        }
+                    } else {
+                        // Intensificar de 0.5 a 1.0
+                        alpha += 0.01f;
+                        if (alpha >= 1.0f) {
+                            alpha = 1.0f;
+                            fading = false;
+                        }
+                    }
+                    
+                    // Aplicar la transparencia al marcador
+                    marker.setAlpha(alpha);
+                    map.invalidate();
+                    
+                    // Continuar la animación (más lento para efecto fluido)
+                    handler.postDelayed(this, 30); // ~33fps para efecto más suave
+                }
+            }
+        };
+        handler.post(fadeRunnable);
     }
 
     private void setupSafePoints() {
@@ -488,6 +657,33 @@ public class MainActivity extends AppCompatActivity {
         // Mostrar panel de opciones
         searchLayout.setVisibility(View.GONE);
         routeInfoLayout.setVisibility(View.VISIBLE);
+        
+        // Configurar visibilidad de botones de exportar según el modo
+        if (vehicleMode) {
+            // Modo vehículo: mostrar ambos botones
+            exportUberButton.setVisibility(View.VISIBLE);
+            exportPedidosYaButton.setVisibility(View.VISIBLE);
+            
+            // Ajustar layout para dos botones
+            LinearLayout.LayoutParams uberParams = (LinearLayout.LayoutParams) exportUberButton.getLayoutParams();
+            uberParams.weight = 1;
+            exportUberButton.setLayoutParams(uberParams);
+            
+            LinearLayout.LayoutParams pedidosParams = (LinearLayout.LayoutParams) exportPedidosYaButton.getLayoutParams();
+            pedidosParams.weight = 1;
+            exportPedidosYaButton.setLayoutParams(pedidosParams);
+        } else {
+            // Modo peatón: solo mostrar Pedidos Ya
+            exportUberButton.setVisibility(View.GONE);
+            exportPedidosYaButton.setVisibility(View.VISIBLE);
+            
+            // Ajustar layout para un solo botón centrado
+            LinearLayout.LayoutParams pedidosParams = (LinearLayout.LayoutParams) exportPedidosYaButton.getLayoutParams();
+            pedidosParams.weight = 0;
+            pedidosParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+            pedidosParams.setMargins(0, 0, 0, 0);
+            exportPedidosYaButton.setLayoutParams(pedidosParams);
+        }
 
         // Seleccionar ruta segura por defecto
         selectRouteType(true);
@@ -627,15 +823,162 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private List<RouteInfo> getSafeRoute(GeoPoint start, GeoPoint end) throws IOException, JSONException {
-        // Generar waypoints intermedios que eviten zonas peligrosas
-        List<GeoPoint> safeWaypoints = generateSafeWaypoints(start, end);
+        System.out.println("\n=== CALCULANDO RUTA SEGURA ===");
         
-        if (safeWaypoints.isEmpty()) {
-            // Si no se pueden generar waypoints seguros, usar la ruta directa
-            return getRoutes(start, end);
+        // Primero, verificar la ruta directa
+        List<RouteInfo> directRoute = getRoutes(start, end);
+        if (directRoute.isEmpty()) {
+            return directRoute;
         }
         
-        // Construir URL con waypoints intermedios
+        // Analizar si la ruta directa pasa por zonas peligrosas
+        List<CrimeAlert> dangerousPoints = findDangersInRoute(directRoute.get(0));
+        
+        if (dangerousPoints.isEmpty()) {
+            System.out.println("✅ Ruta directa es segura, no hay peligros en el camino");
+            return directRoute;
+        }
+        
+        System.out.println("⚠️ Ruta directa pasa por " + dangerousPoints.size() + " zona(s) de peligro");
+        for (CrimeAlert danger : dangerousPoints) {
+            System.out.println("  - " + danger.subType + " (Nivel " + danger.severity + ")");
+        }
+        
+        // Generar waypoints para evitar las zonas peligrosas
+        List<GeoPoint> avoidanceWaypoints = generateAvoidanceWaypoints(start, end, dangerousPoints);
+        
+        if (avoidanceWaypoints.isEmpty()) {
+            System.out.println("❌ No se pueden generar waypoints de evasión, usando ruta directa");
+            return directRoute;
+        }
+        
+        System.out.println("🔄 Generando ruta alternativa con " + avoidanceWaypoints.size() + " waypoint(s) de evasión");
+        
+        // Construir ruta con waypoints
+        return buildRouteWithWaypoints(start, end, avoidanceWaypoints);
+    }
+    
+    private List<CrimeAlert> findDangersInRoute(RouteInfo route) {
+        List<CrimeAlert> dangers = new ArrayList<>();
+        
+        for (CrimeAlert crime : crimeAlerts) {
+            if (crime.location == null) continue;
+            
+            // Radio de detección según gravedad
+            double dangerRadius;
+            switch (crime.severity) {
+                case 1: dangerRadius = 40; break;
+                case 2: dangerRadius = 80; break;
+                case 3: dangerRadius = 180; break;
+                case 4: dangerRadius = 250; break;
+                default: dangerRadius = 100; break;
+            }
+            
+            // Verificar si algún punto de la ruta pasa por esta zona peligrosa
+            for (GeoPoint point : route.points) {
+                double distance = calculateDistance(point, crime.location);
+                if (distance <= dangerRadius) {
+                    if (!dangers.contains(crime)) {
+                        dangers.add(crime);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return dangers;
+    }
+    
+    private List<GeoPoint> generateAvoidanceWaypoints(GeoPoint start, GeoPoint end, List<CrimeAlert> dangers) {
+        List<GeoPoint> waypoints = new ArrayList<>();
+        
+        // Calcular vector de dirección de la ruta
+        double dx = end.getLongitude() - start.getLongitude();
+        double dy = end.getLatitude() - start.getLatitude();
+        double routeLength = Math.sqrt(dx * dx + dy * dy);
+        
+        if (routeLength == 0) return waypoints;
+        
+        // Vector perpendicular normalizado (para desviar a los lados)
+        double perpX = -dy / routeLength;
+        double perpY = dx / routeLength;
+        
+        for (CrimeAlert danger : dangers) {
+            // Calcular el punto de la ruta más cercano al peligro
+            double t = ((danger.location.getLatitude() - start.getLatitude()) * dy + 
+                       (danger.location.getLongitude() - start.getLongitude()) * dx) / 
+                       (routeLength * routeLength);
+            
+            // Limitar t entre 0 y 1 (dentro de la ruta)
+            t = Math.max(0, Math.min(1, t));
+            
+            // Punto más cercano en la ruta al peligro
+            double closestLat = start.getLatitude() + t * dy;
+            double closestLon = start.getLongitude() + t * dx;
+            GeoPoint closestPoint = new GeoPoint(closestLat, closestLon);
+            
+            // Distancia del punto más cercano al peligro
+            double distanceToDanger = calculateDistance(closestPoint, danger.location);
+            
+            // Radio de peligro
+            double dangerRadius;
+            switch (danger.severity) {
+                case 1: dangerRadius = 40; break;
+                case 2: dangerRadius = 80; break;
+                case 3: dangerRadius = 180; break;
+                case 4: dangerRadius = 250; break;
+                default: dangerRadius = 100; break;
+            }
+            
+            // Si el punto más cercano está dentro del radio de peligro, crear waypoint de evasión
+            if (distanceToDanger <= dangerRadius) {
+                // Calcular cuánto desviar (radio + margen de seguridad)
+                double deviationDistance = (dangerRadius - distanceToDanger + 50) / 111000.0; // +50m de margen, convertir a grados
+                
+                // Intentar desviar perpendicular a la ruta (ambos lados)
+                GeoPoint waypoint1 = new GeoPoint(
+                    closestLat + perpY * deviationDistance,
+                    closestLon + perpX * deviationDistance
+                );
+                
+                GeoPoint waypoint2 = new GeoPoint(
+                    closestLat - perpY * deviationDistance,
+                    closestLon - perpX * deviationDistance
+                );
+                
+                // Elegir el waypoint que esté más lejos de TODOS los peligros
+                double dist1 = getMinDistanceToDangers(waypoint1, crimeAlerts);
+                double dist2 = getMinDistanceToDangers(waypoint2, crimeAlerts);
+                
+                GeoPoint chosenWaypoint = (dist1 > dist2) ? waypoint1 : waypoint2;
+                
+                waypoints.add(chosenWaypoint);
+                System.out.println("  ✓ Waypoint de evasión: " + 
+                    String.format("%.6f, %.6f", chosenWaypoint.getLatitude(), chosenWaypoint.getLongitude()) +
+                    " (desviación: " + String.format("%.0f", deviationDistance * 111000) + "m)");
+            }
+        }
+        
+        // Limitar a máximo 5 waypoints
+        if (waypoints.size() > 5) {
+            waypoints = waypoints.subList(0, 5);
+        }
+        
+        return waypoints;
+    }
+    
+    private double getMinDistanceToDangers(GeoPoint point, List<CrimeAlert> alerts) {
+        double minDistance = Double.MAX_VALUE;
+        for (CrimeAlert alert : alerts) {
+            if (alert.location != null) {
+                double dist = calculateDistance(point, alert.location);
+                minDistance = Math.min(minDistance, dist);
+            }
+        }
+        return minDistance;
+    }
+    
+    private List<RouteInfo> buildRouteWithWaypoints(GeoPoint start, GeoPoint end, List<GeoPoint> waypoints) throws IOException, JSONException {
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append("https://graphhopper.com/api/1/route?");
         
@@ -643,38 +986,25 @@ public class MainActivity extends AppCompatActivity {
         urlBuilder.append("point=").append(start.getLatitude()).append(",").append(start.getLongitude());
         
         // Waypoints intermedios
-        for (GeoPoint waypoint : safeWaypoints) {
+        for (GeoPoint waypoint : waypoints) {
             urlBuilder.append("&point=").append(waypoint.getLatitude()).append(",").append(waypoint.getLongitude());
         }
         
         // Punto de destino
         urlBuilder.append("&point=").append(end.getLatitude()).append(",").append(end.getLongitude());
         
-        // Parámetros adicionales - usar vehículo según el modo
+        // Parámetros
         String vehicle = vehicleMode ? "car" : "foot";
-        urlBuilder.append("&vehicle=").append(vehicle).append("&key=").append(GRAPHHOPPER_API_KEY)
+        urlBuilder.append("&vehicle=").append(vehicle)
+                  .append("&key=").append(GRAPHHOPPER_API_KEY)
                   .append("&points_encoded=true");
         
         String urlString = urlBuilder.toString();
-        System.out.println("Safe Route URL (" + (vehicleMode ? "vehicle" : "walking") + "): " + urlString);
-        
-        // Verificar longitud de URL para evitar errores
-        if (urlString.length() > 2000) {
-            System.out.println("URL demasiado larga (" + urlString.length() + " chars), usando ruta directa");
-            return getRoutes(start, end);
-        }
         
         try {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            
-            // Verificar código de respuesta
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-                System.out.println("Error en respuesta GraphHopper: " + responseCode + ", usando ruta directa");
-                return getRoutes(start, end);
-            }
             
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder result = new StringBuilder();
@@ -688,9 +1018,6 @@ public class MainActivity extends AppCompatActivity {
             JSONArray paths = jsonObject.getJSONArray("paths");
             List<RouteInfo> routes = new ArrayList<>();
             
-            System.out.println("=== Safe Route Response ===");
-            System.out.println("Número de rutas seguras devueltas: " + paths.length());
-            
             for (int i = 0; i < paths.length(); i++) {
                 JSONObject path = paths.getJSONObject(i);
                 String encodedPolyline = path.getString("points");
@@ -699,144 +1026,48 @@ public class MainActivity extends AppCompatActivity {
                 double distance = path.getDouble("distance");
                 routes.add(new RouteInfo(points, time, distance));
                 
-                System.out.println("Ruta segura " + (i+1) + " - Tiempo: " + time/1000 + "s, Distancia: " + distance + "m, Puntos: " + points.size());
+                System.out.println("✅ Ruta segura generada: " + 
+                    String.format("%.0f", distance) + "m, " + 
+                    (time / 60000) + " min");
             }
             
             return routes;
             
         } catch (Exception e) {
-            System.out.println("Error al calcular ruta segura: " + e.getMessage());
-            e.printStackTrace();
-            // Fallback: usar ruta directa
+            System.out.println("❌ Error generando ruta con waypoints: " + e.getMessage());
             return getRoutes(start, end);
         }
     }
 
+    // MÉTODO DEPRECADO - Ya no se usa, ahora evaluamos rutas alternativas de GraphHopper
     private List<GeoPoint> generateSafeWaypoints(GeoPoint start, GeoPoint end) {
-        List<GeoPoint> waypoints = new ArrayList<>();
-        
-        // Calcular la línea directa entre origen y destino
-        double startLat = start.getLatitude();
-        double startLon = start.getLongitude();
-        double endLat = end.getLatitude();
-        double endLon = end.getLongitude();
-        
-        // Crear más puntos de verificación para mejor detección de peligros
-        int numSegments = vehicleMode ? 3 : 5; // Más segmentos para peatones para mejor detección
-        
-        for (int i = 1; i < numSegments; i++) {
-            double ratio = (double) i / numSegments;
-            double intermediateLat = startLat + (endLat - startLat) * ratio;
-            double intermediateLon = startLon + (endLon - startLon) * ratio;
-            
-            GeoPoint intermediatePoint = new GeoPoint(intermediateLat, intermediateLon);
-            
-            // Verificar si este punto está cerca de una zona peligrosa
-            if (isPointNearDanger(intermediatePoint)) {
-                // Mover el punto a una ubicación más segura
-                GeoPoint safePoint = findSaferNearbyPoint(intermediatePoint);
-                if (safePoint != null) {
-                    waypoints.add(safePoint);
-                    System.out.println("Waypoint seguro agregado para " + (vehicleMode ? "vehículo" : "peatón") + ": " + safePoint.getLatitude() + "," + safePoint.getLongitude());
-                }
-            }
-        }
-        
-        // Para peatones, agregar waypoints adicionales si la ruta pasa cerca de crímenes en vía pública
-        if (!vehicleMode) {
-            addPedestrianSpecificWaypoints(start, end, waypoints);
-        }
-        
-        // Limitar waypoints adicionales para vehículos
-        if (vehicleMode && waypoints.size() < 2) {
-            addVehicleSpecificWaypoints(start, end, waypoints);
-        }
-        
-        // Limitar a máximo 3 waypoints para evitar URLs demasiado largas
-        if (waypoints.size() > 3) {
-            waypoints = waypoints.subList(0, 3);
-        }
-        
-        System.out.println("Total waypoints generados para " + (vehicleMode ? "vehículo" : "peatón") + ": " + waypoints.size());
-        
-        return waypoints;
+        return new ArrayList<>();
     }
 
+    // MÉTODO DEPRECADO - Ya no se usa para rutas, solo para verificación de puntos individuales
     private boolean isPointNearDanger(GeoPoint point) {
-        // Verificar proximidad a alertas de crimen
         for (CrimeAlert crime : crimeAlerts) {
             if (crime.location != null) {
-                // En modo vehículo, dar más peso a robos de vehículos
-                double riskRadius = 200; // Radio base
-                double riskMultiplier = 1.0;
-                
-                if (vehicleMode && "Robo de vehículos".equals(crime.crimeType)) {
-                    riskMultiplier = 2.0; // Doblar el radio de riesgo para vehículos
-                } else if (!vehicleMode && "Crimen en vía pública".equals(crime.crimeType)) {
-                    riskMultiplier = 2.0; // Doblar el radio para peatones con crímenes callejeros
-                } else if (!vehicleMode) {
-                    riskMultiplier = 1.2; // Incrementar ligeramente para todos los crímenes en modo peatón
+                double dangerRadius;
+                switch (crime.severity) {
+                    case 1: dangerRadius = 40; break;
+                    case 2: dangerRadius = 80; break;
+                    case 3: dangerRadius = 180; break;
+                    case 4: dangerRadius = 250; break;
+                    default: dangerRadius = 100; break;
                 }
                 
-                double adjustedRadius = riskRadius * riskMultiplier;
                 double distance = calculateDistance(point, crime.location);
-                
-                if (distance <= adjustedRadius) {
-                    System.out.println("Peligro detectado para " + (vehicleMode ? "vehículo" : "peatón") + 
-                        " - Tipo: " + crime.crimeType + ", Distancia: " + distance + "m, Radio: " + adjustedRadius + "m");
+                if (distance <= dangerRadius) {
                     return true;
                 }
             }
         }
-        
-        // Verificar si está dentro de zonas de peligro (polígonos)
-        for (Polygon dangerZone : dangerZones) {
-            if (isPointInPolygon(point, dangerZone)) {
-                return true;
-            }
-        }
-        
         return false;
     }
 
+    // MÉTODO DEPRECADO - Ya no se usa
     private GeoPoint findSaferNearbyPoint(GeoPoint dangerousPoint) {
-        // Buscar en un radio más amplio para peatones
-        double[] offsets = vehicleMode ? 
-            new double[]{0.002, -0.002} : // 200m para vehículos
-            new double[]{0.003, -0.003, 0.004, -0.004}; // 300-400m para peatones
-        
-        for (double latOffset : offsets) {
-            for (double lonOffset : offsets) {
-                GeoPoint candidate = new GeoPoint(
-                    dangerousPoint.getLatitude() + latOffset,
-                    dangerousPoint.getLongitude() + lonOffset
-                );
-                
-                if (!isPointNearDanger(candidate)) {
-                    System.out.println("Punto seguro encontrado para " + (vehicleMode ? "vehículo" : "peatón") + 
-                        ": " + candidate.getLatitude() + "," + candidate.getLongitude());
-                    return candidate;
-                }
-            }
-        }
-        
-        // Si no se encuentra un punto seguro, intentar con offsets más pequeños
-        double[] smallOffsets = {0.001, -0.001};
-        for (double latOffset : smallOffsets) {
-            for (double lonOffset : smallOffsets) {
-                GeoPoint candidate = new GeoPoint(
-                    dangerousPoint.getLatitude() + latOffset,
-                    dangerousPoint.getLongitude() + lonOffset
-                );
-                
-                if (!isPointNearDanger(candidate)) {
-                    System.out.println("Punto seguro alternativo encontrado: " + candidate.getLatitude() + "," + candidate.getLongitude());
-                    return candidate;
-                }
-            }
-        }
-        
-        // Si no se encuentra un punto seguro, devolver null
         return null;
     }
 
@@ -946,18 +1177,28 @@ public class MainActivity extends AppCompatActivity {
             if (crime.location != null) {
                 double distance = calculateDistance(point, crime.location);
                 
+                // Radio de influencia ajustado según gravedad del crimen
+                // Nivel 1: 40m + (1 * 53.33) = 93.33m ≈ 93m
+                // Nivel 2: 40m + (2 * 53.33) = 146.67m ≈ 147m
+                // Nivel 3: 40m + (3 * 53.33) = 200m
+                // Nivel 4: 40m + (4 * 53.33) = 253.33m ≈ 253m, pero limitamos a 200m
+                double influenceRadius = Math.min(40 + (crime.severity * 53.33), 200); // 40m para nivel 1, 200m para nivel 4
+                
                 // Riesgo decae exponencialmente con la distancia
-                if (distance <= 500) { // 500 metros de radio de influencia (aumentado)
+                if (distance <= influenceRadius) {
+                    // Factor base de riesgo según gravedad (nivel 4 = 4x más riesgo que nivel 1)
+                    double severityWeight = crime.severity * 12.5; // 12.5 para nivel 1, 50.0 para nivel 4
+                    
                     double riskFactor;
                     if (distance <= 100) {
                         // Muy alto riesgo si está muy cerca
-                        riskFactor = 50.0;
+                        riskFactor = severityWeight * 1.5;
                     } else if (distance <= 200) {
                         // Alto riesgo
-                        riskFactor = 30.0 * Math.exp(-distance / 50.0);
+                        riskFactor = severityWeight * Math.exp(-distance / 50.0);
                     } else {
                         // Riesgo moderado que decae exponencialmente
-                        riskFactor = 15.0 * Math.exp(-distance / 100.0);
+                        riskFactor = severityWeight * 0.5 * Math.exp(-distance / 100.0);
                     }
                     totalRisk += riskFactor;
                 }
@@ -1199,130 +1440,278 @@ public class MainActivity extends AppCompatActivity {
         if (view == null) view = new View(this);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+    
+    private void setDestinationFromMapTap(GeoPoint point) {
+        // Geocodificar inversamente para obtener la dirección
+        new Thread(() -> {
+            try {
+                // Usar Nominatim para reverse geocoding
+                String urlString = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + 
+                    point.getLatitude() + "&lon=" + point.getLongitude() + "&zoom=18&addressdetails=1";
+                
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("User-Agent", getPackageName());
+                
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                reader.close();
+                
+                JSONObject jsonObject = new JSONObject(result.toString());
+                String displayName = jsonObject.getString("display_name");
+                
+                // Extraer dirección más corta
+                String address = displayName;
+                if (jsonObject.has("address")) {
+                    JSONObject addressObj = jsonObject.getJSONObject("address");
+                    StringBuilder shortAddress = new StringBuilder();
+                    
+                    if (addressObj.has("road")) {
+                        shortAddress.append(addressObj.getString("road"));
+                        if (addressObj.has("house_number")) {
+                            shortAddress.append(" ").append(addressObj.getString("house_number"));
+                        }
+                        shortAddress.append(", Buenos Aires, Argentina");
+                        address = shortAddress.toString();
+                    }
+                }
+                
+                final String finalAddress = address;
+                
+                runOnUiThread(() -> {
+                    destinationEditText.setText(finalAddress);
+                    Toast.makeText(MainActivity.this, "📍 Destino: " + finalAddress, Toast.LENGTH_SHORT).show();
+                });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    // Si falla el reverse geocoding, usar las coordenadas directamente
+                    String coords = String.format(Locale.US, "%.6f, %.6f", point.getLatitude(), point.getLongitude());
+                    destinationEditText.setText(coords);
+                    Toast.makeText(MainActivity.this, "📍 Destino establecido en: " + coords, Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+    
+    private void exportToUber() {
+        String origin = originEditText.getText().toString().trim();
+        String destination = destinationEditText.getText().toString().trim();
+        
+        if (origin.isEmpty()) {
+            origin = "Av. Santa Fe 995, Buenos Aires, Argentina";
+        }
+        
+        if (destination.isEmpty()) {
+            Toast.makeText(this, "No hay destino definido", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        try {
+            // Construir URL de Uber con origen y destino
+            String uberUrl = "uber://?action=setPickup&pickup=my_location&dropoff[formatted_address]=" + 
+                           URLEncoder.encode(destination, "UTF-8");
+            
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(android.net.Uri.parse(uberUrl));
+            
+            // Verificar si la app de Uber está instalada
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                // Si no está instalada, abrir en el navegador
+                String webUrl = "https://m.uber.com/looking?drop%5B0%5D%5Baddress%5D=" + 
+                              URLEncoder.encode(destination, "UTF-8");
+                intent.setData(android.net.Uri.parse(webUrl));
+                startActivity(intent);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error al abrir Uber", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+    
+    private void exportToPedidosYa() {
+        String origin = originEditText.getText().toString().trim();
+        String destination = destinationEditText.getText().toString().trim();
+        
+        if (origin.isEmpty()) {
+            origin = "Av. Santa Fe 995, Buenos Aires, Argentina";
+        }
+        
+        if (destination.isEmpty()) {
+            Toast.makeText(this, "No hay destino definido", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        try {
+            // Construir URL de Pedidos Ya
+            // Pedidos Ya usa un formato similar a otros servicios de delivery
+            String pedidosYaUrl = "pedidosya://rides?destination=" + URLEncoder.encode(destination, "UTF-8");
+            
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(android.net.Uri.parse(pedidosYaUrl));
+            
+            // Verificar si la app está instalada
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                // Si no está instalada, abrir en el navegador
+                String webUrl = "https://www.pedidosya.com.ar/envios";
+                intent.setData(android.net.Uri.parse(webUrl));
+                startActivity(intent);
+                Toast.makeText(this, "Pedidos Ya no está instalado. Abriendo página web...", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error al abrir Pedidos Ya", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
 
     private void setupCrimeAlerts() {
-        // ========== CRIMEN EN VÍA PÚBLICA ==========
-        // Alertas de robos en la Av. Corrientes del 100 al 1000
+        // ========== DELITOS CONTRA LAS PERSONAS ==========
+        // Alertas de crímenes contra transeúntes en la vía pública
         // Usando direcciones reales que serán geocodificadas por la API
 
-        // Alerta 1: Av. Corrientes 300
+        // Alerta 1: Av. Corrientes 300 - Robo con arma
         crimeAlerts.add(new CrimeAlert(
                 "Robo a mano armada",
                 "Se reportó un robo a mano armada en esta zona. El incidente ocurrió en horario nocturno cuando la víctima caminaba sola.",
                 "Av. Corrientes 300, Buenos Aires, Argentina",
                 "Hace 2 días",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2
         ));
 
-        // Alerta 2: Av. Corrientes 600
+        // Alerta 2: Av. Corrientes 600 - Robo de pertenencias
         crimeAlerts.add(new CrimeAlert(
                 "Robo de pertenencias",
                 "Robo de celular y billetera reportado por transeúntes. Los delincuentes escaparon en motocicleta.",
                 "Av. Corrientes 600, Buenos Aires, Argentina",
                 "Hace 1 semana",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2
         ));
 
-        // Alerta 3: Av. Corrientes 900
+        // Alerta 3: Av. Corrientes 900 - Intento de robo
         crimeAlerts.add(new CrimeAlert(
                 "Intento de robo",
                 "Intento de robo frustrado gracias a la intervención de transeúntes. Se recomienda precaución en la zona.",
                 "Av. Corrientes 900, Buenos Aires, Argentina",
                 "Hace 4 días",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2
         ));
 
-        // Alerta 4: Florida y Lavalle (zona peatonal)
+        // Alerta 4: Florida 300 - Arrebato
         crimeAlerts.add(new CrimeAlert(
                 "Arrebato de cartera",
                 "Arrebato de cartera en la zona peatonal durante el horario comercial. La víctima reportó que fueron dos personas en bicicleta.",
                 "Florida 300, Buenos Aires, Argentina",
                 "Hace 3 días",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2
         ));
 
-        // Alerta 5: Sarmiento cerca de Florida
+        // Alerta 5: Sarmiento 500 - Robo con intimidación
         crimeAlerts.add(new CrimeAlert(
                 "Robo en taxi",
                 "Robo en el interior de un taxi. El conductor era cómplice del hecho. Se recomienda usar aplicaciones de transporte verificadas.",
                 "Sarmiento 500, Buenos Aires, Argentina",
                 "Hace 1 día",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2
         ));
 
-        // Alerta 6: Lavalle peatonal
+        // Alerta 6: Lavalle 600 - Hurto
         crimeAlerts.add(new CrimeAlert(
                 "Hurto por distracción",
                 "Hurto de billetera mediante distracción en zona comercial. Los delincuentes operaban en grupo fingiendo ser compradores.",
                 "Lavalle 600, Buenos Aires, Argentina",
                 "Hace 5 días",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Hurto",
+                1
         ));
 
-        // Alerta 7: Av. Santa Fe cerca de Florida
+        // Alerta 7: Av. Santa Fe 800 - Robo con intimidación
         crimeAlerts.add(new CrimeAlert(
                 "Robo nocturno",
                 "Robo con intimidación en parada de colectivo durante la madrugada. Se llevaron teléfono y documentos.",
                 "Av. Santa Fe 800, Buenos Aires, Argentina",
                 "Hace 1 semana",
-                "Crimen en vía pública"
+                "Crimen en vía pública",
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2
         ));
 
-        // ========== ROBO DE VEHÍCULOS ==========
-        // Nuevos casos de robo de vehículos en la misma zona
+        // ========== DELITOS CONTRA LA PROPIEDAD (VEHÍCULOS) ==========
+        // Casos de robo de vehículos en la zona
 
-        // Robo de vehículo 1: Cerca de Av. Corrientes
+        // Robo de vehículo 1: Av. Corrientes 450 - Robo vehículo estacionado
         crimeAlerts.add(new CrimeAlert(
                 "Robo de automóvil",
                 "Robo de vehículo Toyota Corolla blanco en estacionamiento. Los delincuentes forzaron la cerradura y se llevaron el auto en menos de 3 minutos.",
                 "Av. Corrientes 450, Buenos Aires, Argentina",
                 "Hace 2 días",
-                "Robo de vehículos"
+                "Robo de vehículos",
+                "Delitos contra la propiedad",
+                "Robo vehículo estacionado",
+                3
         ));
 
-        // Robo de vehículo 2: Florida
-        crimeAlerts.add(new CrimeAlert(
-                "Robo de motocicleta",
-                "Sustracción de motocicleta Honda 125cc estacionada en la vía pública. La víctima había dejado el vehículo atado con cadena.",
-                "Florida 250, Buenos Aires, Argentina",
-                "Hace 4 días",
-                "Robo de vehículos"
-        ));
-
-        // Robo de vehículo 3: Sarmiento
-        crimeAlerts.add(new CrimeAlert(
-                "Robo con intimidación",
-                "Robo de vehículo Volkswagen Gol con arma de fuego. El conductor fue obligado a entregar las llaves en un semáforo.",
-                "Sarmiento 350, Buenos Aires, Argentina",
-                "Hace 1 día",
-                "Robo de vehículos"
-        ));
-
-        // Robo de vehículo 4: Lavalle
+        // Robo de vehículo 2: Lavalle 500 - Robo pertenencias de vehículo
         crimeAlerts.add(new CrimeAlert(
                 "Robo de bicicleta",
                 "Robo de bicicleta de alta gama en plena calle peatonal. Los delincuentes cortaron la cadena de seguridad con herramientas especializadas.",
                 "Lavalle 500, Buenos Aires, Argentina",
                 "Hace 3 días",
-                "Robo de vehículos"
+                "Robo de vehículos",
+                "Delitos contra la propiedad",
+                "Robo pertenencias de vehículo",
+                2
         ));
 
-        // Robo de vehículo 5: Av. Santa Fe
+        // Robo de vehículo 3: Av. Santa Fe 750 - Robo vehículo estacionado
         crimeAlerts.add(new CrimeAlert(
                 "Robo de camioneta",
                 "Sustracción de camioneta Ford EcoSport del estacionamiento de un centro comercial. Los ladrones utilizaron inhibidores de alarma.",
                 "Av. Santa Fe 750, Buenos Aires, Argentina",
                 "Hace 6 días",
-                "Robo de vehículos"
+                "Robo de vehículos",
+                "Delitos contra la propiedad",
+                "Robo vehículo estacionado",
+                3
         ));
 
-        // Robo de vehículo 6: Cerca de Corrientes
+        // Robo de vehículo 4: Av. Corrientes 750 - Robo armado
         crimeAlerts.add(new CrimeAlert(
-                "Robo de scooter",
-                "Robo de scooter eléctrico mientras el propietario realizaba una entrega. Los delincuentes actuaron en grupo y huyeron rápidamente.",
+                "Robo de vehículo a mano armada",
+                "Robo de scooter eléctrico a mano armada mientras el propietario realizaba una entrega. Los delincuentes actuaron en grupo con armas de fuego.",
                 "Av. Corrientes 750, Buenos Aires, Argentina",
                 "Hace 5 días",
-                "Robo de vehículos"
+                "Robo de vehículos",
+                "Delitos contra la propiedad",
+                "Robo armado",
+                4
         ));
     }
 
@@ -1348,16 +1737,19 @@ public class MainActivity extends AppCompatActivity {
                             marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
                             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                             
-                            // Seleccionar ícono según el tipo de crimen
-                            Drawable alertIcon;
-                            if ("Robo de vehículos".equals(alert.crimeType)) {
-                                // Usar ícono diferente para robos de vehículos
-                                alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
-                                // Para distinguirlos mejor, podríamos usar un color diferente
-                                marker.setAlpha(0.8f); // Ligeramente transparente para diferenciar
+                            // Seleccionar ícono y color según la categoría del crimen
+                            Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
+                            
+                            if ("Delitos contra la propiedad".equals(alert.category)) {
+                                // Robos de vehículos - Color violeta
+                                if (alertIcon != null) {
+                                    alertIcon.setTint(Color.parseColor("#9C27B0")); // Violeta
+                                }
                             } else {
-                                // Crimen en vía pública
-                                alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
+                                // Delitos contra las personas (transeúntes) - Color rojo
+                                if (alertIcon != null) {
+                                    alertIcon.setTint(Color.parseColor("#F44336")); // Rojo
+                                }
                             }
                             marker.setIcon(alertIcon);
                             
@@ -1369,12 +1761,18 @@ public class MainActivity extends AppCompatActivity {
 
                             map.getOverlays().add(marker);
                             crimeAlertMarkers.add(marker);
+                            
+                            // Agregar animación de rebote al marcador
+                            startCrimeAlertAnimation(marker);
                         }
                     }
                     map.invalidate();
                     
                     // Centrar el mapa en la zona de las alertas si se geocodificaron correctamente
                     centerMapOnAlerts();
+                    
+                    // Crear zonas de calor DESPUÉS de geocodificar las alertas
+                    createDangerZones();
                 });
                 
             } catch (Exception e) {
@@ -1410,23 +1808,47 @@ public class MainActivity extends AppCompatActivity {
     private void showCrimeAlertDialog(CrimeAlert alert) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         
-        // Personalizar título según el tipo de crimen
-        String titleIcon = "Robo de vehículos".equals(alert.crimeType) ? "🚗" : "⚠️";
+        // Personalizar título según la categoría
+        String titleIcon = "Delitos contra la propiedad".equals(alert.category) ? "🚗" : "⚠️";
         builder.setTitle(titleIcon + " " + alert.title);
         
-        String message = "🏷️ Tipo: " + alert.crimeType + "\n\n" +
+        // Emoji de gravedad
+        String severityEmoji;
+        switch (alert.severity) {
+            case 4: severityEmoji = "🔴"; break;
+            case 3: severityEmoji = "🟠"; break;
+            case 2: severityEmoji = "🟡"; break;
+            case 1: severityEmoji = "🟢"; break;
+            default: severityEmoji = "⚪"; break;
+        }
+        
+        String message = "📂 Categoría: " + alert.category + "\n\n" +
+                        "🏷️ Tipo: " + alert.subType + "\n\n" +
+                        severityEmoji + " Gravedad: " + alert.getSeverityText() + " (" + alert.severity + "/4)\n\n" +
                         "📍 Ubicación: " + alert.address + "\n\n" +
                         "🕒 Cuándo: " + alert.timeAgo + "\n\n" +
                         "📝 Detalles: " + alert.description + "\n\n";
         
-        // Mensaje de precaución específico según el tipo
-        if ("Robo de vehículos".equals(alert.crimeType)) {
-            message += "🚨 Recomendación: Evite estacionar vehículos en esta zona. " +
-                      "Si debe hacerlo, use sistemas de seguridad adicionales y evite " +
-                      "dejar objetos de valor a la vista.";
+        // Mensaje de precaución específico según la categoría y gravedad
+        if ("Delitos contra la propiedad".equals(alert.category)) {
+            message += "🚨 Recomendación: ";
+            if (alert.severity >= 3) {
+                message += "PELIGRO ALTO - Evite estacionar vehículos en esta zona. " +
+                          "Si debe hacerlo, use sistemas de seguridad múltiples y estacione en lugares vigilados.";
+            } else {
+                message += "Use sistemas de seguridad adicionales y evite dejar objetos de valor a la vista.";
+            }
         } else {
-            message += "⚠️ Recomendación: Se recomienda evitar esta zona o transitar con precaución, " +
-                      "especialmente en horarios nocturnos. Manténgase alerta y evite mostrar objetos de valor.";
+            message += "⚠️ Recomendación: ";
+            if (alert.severity >= 3) {
+                message += "PELIGRO ALTO - Se recomienda evitar esta zona. Si debe transitar, hágalo acompañado " +
+                          "y en horarios diurnos. Mantenga alerta máxima.";
+            } else if (alert.severity == 2) {
+                message += "Transite con precaución, especialmente en horarios nocturnos. " +
+                          "Manténgase alerta y evite mostrar objetos de valor.";
+            } else {
+                message += "Mantenga precauciones básicas. Esté atento a su entorno.";
+            }
         }
         
         builder.setMessage(message);
@@ -1437,37 +1859,17 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void toggleDangerZones() {
-        showAllCrimes = !showAllCrimes;
-        if (showAllCrimes) {
-            // Activar mostrar todos los crímenes
-            showStreetCrime = true;
-            showVehicleCrime = true;
-        } else {
-            // Desactivar todos los filtros
-            showStreetCrime = false;
-            showVehicleCrime = false;
-        }
-        
-        updateCrimeFilterButtons();
-        refreshCrimeDisplay();
-        
-        String status = showAllCrimes ? "Mostrando todos los crímenes" : "Ocultando zonas de peligro";
-        Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
-    }
+    // Método eliminado - ya no se usa el botón amarillo para mostrar/ocultar todas las zonas
 
     private void createDangerZones() {
         // Primero, limpiar zonas existentes
         hideDangerZones();
         
-        // Crear zonas individuales para cada crimen
+        // Crear zonas individuales para cada crimen basadas en su gravedad
         for (CrimeAlert crime : crimeAlerts) {
             if (crime.location != null) {
-                // Contar cuántos crímenes hay cerca de este
-                int nearbyCount = countNearbyCrimes(crime.location, 200.0); // 200 metros de radio
-                
-                // Crear zona individual pero con color basado en densidad local
-                createDangerZone(crime.location, nearbyCount);
+                // Usar la gravedad del crimen directamente (1-4)
+                createDangerZone(crime.location, crime.severity);
             }
         }
         
@@ -1546,44 +1948,44 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void createDangerZone(GeoPoint center, int dangerLevel) {
+    private void createDangerZone(GeoPoint center, int severity) {
         if (center == null) return;
         
-        // Determinar color y tamaño basado en el nivel de peligro
+        // Determinar color, tamaño y transparencia basado en la gravedad del crimen (1-4)
         int color;
         double radiusInMeters;
         int alpha;
         
-        switch (dangerLevel) {
-            case 1:
-                color = Color.parseColor("#FFEB3B"); // Amarillo
-                radiusInMeters = 120;
-                alpha = 40; // Muy transparente para permitir superposición
+        switch (severity) {
+            case 1: // Leve
+                color = Color.parseColor("#FFD700"); // Amarillo dorado
+                radiusInMeters = 40; // Radio pequeño para crímenes leves
+                alpha = 50; // Muy transparente
                 break;
-            case 2:
-                color = Color.parseColor("#FF9800"); // Naranja
-                radiusInMeters = 140;
-                alpha = 70; // Más visible cuando hay 2 crímenes cerca
+            case 2: // Moderado
+                color = Color.parseColor("#FFA500"); // Naranja
+                radiusInMeters = 80; // Radio medio-bajo
+                alpha = 70; // Moderadamente visible
                 break;
-            case 3:
-                color = Color.parseColor("#FF5722"); // Naranja-rojo
-                radiusInMeters = 160;
-                alpha = 90;
+            case 3: // Grave
+                color = Color.parseColor("#FF4444"); // Rojo más claro
+                radiusInMeters = 180; // Radio grande
+                alpha = 85; // Visible pero no excesivo
                 break;
-            case 4:
-                color = Color.parseColor("#F44336"); // Rojo
-                radiusInMeters = 180;
-                alpha = 110;
+            case 4: // Muy Grave
+                color = Color.parseColor("#CC0000"); // Rojo intenso pero no tan oscuro
+                radiusInMeters = 250; // Radio muy grande para máxima gravedad
+                alpha = 100; // Opaco pero no tanto como para ocultar el mapa
                 break;
-            default: // 5 o más
-                color = Color.parseColor("#D32F2F"); // Rojo oscuro
-                radiusInMeters = 200;
-                alpha = 130; // Más opaco para zonas muy peligrosas
+            default: // Fallback
+                color = Color.parseColor("#FFA500"); // Naranja por defecto
+                radiusInMeters = 80;
+                alpha = 70;
                 break;
         }
         
-        // Limitar el alpha máximo a 255
-        alpha = Math.min(alpha, 180); // No demasiado opaco para mantener visibilidad
+        // Limitar el alpha máximo para no ocultar demasiado el mapa
+        alpha = Math.min(alpha, 100); // Reducido para mejor visibilidad del mapa
         
         // Crear círculo de peligro
         List<GeoPoint> circlePoints = createCirclePoints(center, radiusInMeters);
@@ -1634,10 +2036,101 @@ public class MainActivity extends AppCompatActivity {
         
         // Referencias a los campos del formulario
         EditText addressInput = dialogView.findViewById(R.id.address_input);
-        EditText incidentInput = dialogView.findViewById(R.id.incident_input);
+        EditText incidentDescriptionInput = dialogView.findViewById(R.id.incident_description_input);
         EditText timeInput = dialogView.findViewById(R.id.time_input);
         Button selectImageButton = dialogView.findViewById(R.id.select_image_button);
         TextView imageSelectedText = dialogView.findViewById(R.id.image_selected_text);
+        android.widget.Spinner categorySpinner = dialogView.findViewById(R.id.category_spinner);
+        android.widget.Spinner subtypeSpinner = dialogView.findViewById(R.id.subtype_spinner);
+        TextView severityInfoText = dialogView.findViewById(R.id.severity_info_text);
+        
+        // Configurar categorías
+        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad"};
+        android.widget.ArrayAdapter<String> categoryAdapter = new android.widget.ArrayAdapter<>(
+            this, android.R.layout.simple_spinner_dropdown_item, categories);
+        categorySpinner.setAdapter(categoryAdapter);
+        
+        // Mapa de subtipos por categoría con sus gravedades
+        Map<String, Map<String, Integer>> subtypesByCategoryWithSeverity = new HashMap<>();
+        
+        // Delitos contra las personas
+        Map<String, Integer> personCrimes = new HashMap<>();
+        personCrimes.put("Homicidio", 4);
+        personCrimes.put("Agresión grave", 3);
+        personCrimes.put("Robo/Arrebato", 2);
+        personCrimes.put("Hurto", 1);
+        personCrimes.put("Agresión leve", 1);
+        subtypesByCategoryWithSeverity.put("Delitos contra las personas", personCrimes);
+        
+        // Delitos contra la propiedad
+        Map<String, Integer> propertyCrimes = new HashMap<>();
+        propertyCrimes.put("Robo armado", 4);
+        propertyCrimes.put("Robo vehículo estacionado", 3);
+        propertyCrimes.put("Robo pertenencias de vehículo", 2);
+        subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
+        
+        // Configurar listener para cambio de categoría
+        categorySpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                String selectedCategory = categories[position];
+                Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(selectedCategory);
+                
+                String[] subtypeArray = subtypes.keySet().toArray(new String[0]);
+                android.widget.ArrayAdapter<String> subtypeAdapter = new android.widget.ArrayAdapter<>(
+                    MainActivity.this, android.R.layout.simple_spinner_dropdown_item, subtypeArray);
+                subtypeSpinner.setAdapter(subtypeAdapter);
+                
+                // Actualizar gravedad cuando cambia el subtipo
+                subtypeSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                        String selectedSubtype = subtypeArray[position];
+                        Integer severity = subtypes.get(selectedSubtype);
+                        
+                        String severityEmoji;
+                        String severityText;
+                        int severityColor;
+                        
+                        switch (severity) {
+                            case 4:
+                                severityEmoji = "🔴";
+                                severityText = "Muy Grave";
+                                severityColor = Color.parseColor("#8B0000");
+                                break;
+                            case 3:
+                                severityEmoji = "🟠";
+                                severityText = "Grave";
+                                severityColor = Color.parseColor("#FF0000");
+                                break;
+                            case 2:
+                                severityEmoji = "🟡";
+                                severityText = "Moderado";
+                                severityColor = Color.parseColor("#FFA500");
+                                break;
+                            case 1:
+                                severityEmoji = "🟢";
+                                severityText = "Leve";
+                                severityColor = Color.parseColor("#FFD700");
+                                break;
+                            default:
+                                severityEmoji = "⚪";
+                                severityText = "Desconocido";
+                                severityColor = Color.parseColor("#CCCCCC");
+                        }
+                        
+                        severityInfoText.setText(severityEmoji + " Gravedad: " + severityText + " (" + severity + "/4)");
+                        severityInfoText.setTextColor(severityColor);
+                    }
+                    
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+                });
+            }
+            
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
         
         // Configurar el botón de seleccionar imagen
         selectImageButton.setOnClickListener(v -> {
@@ -1657,17 +2150,13 @@ public class MainActivity extends AppCompatActivity {
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(v -> {
             String address = addressInput.getText().toString().trim();
-            String incident = incidentInput.getText().toString().trim();
             String time = timeInput.getText().toString().trim();
+            String category = (String) categorySpinner.getSelectedItem();
+            String subtype = (String) subtypeSpinner.getSelectedItem();
             
             // Validar campos obligatorios
             if (address.isEmpty()) {
                 addressInput.setError("Por favor, ingresa la dirección");
-                return;
-            }
-            
-            if (incident.isEmpty()) {
-                incidentInput.setError("Por favor, describe el incidente");
                 return;
             }
             
@@ -1676,16 +2165,49 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             
+            // Obtener gravedad del subtipo seleccionado
+            Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(category);
+            int severity = subtypes.get(subtype);
+            
             // Simular envío del reporte
             dialog.dismiss();
-            showReportSuccessDialog();
+            showReportSuccessDialog(category, subtype, severity);
         });
     }
     
-    private void showReportSuccessDialog() {
+    private void showReportSuccessDialog(String category, String subtype, int severity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("✅ Reporte Enviado");
+        
+        String severityEmoji;
+        String severityText;
+        switch (severity) {
+            case 4:
+                severityEmoji = "🔴";
+                severityText = "Muy Grave";
+                break;
+            case 3:
+                severityEmoji = "🟠";
+                severityText = "Grave";
+                break;
+            case 2:
+                severityEmoji = "🟡";
+                severityText = "Moderado";
+                break;
+            case 1:
+                severityEmoji = "🟢";
+                severityText = "Leve";
+                break;
+            default:
+                severityEmoji = "⚪";
+                severityText = "Desconocido";
+        }
+        
         builder.setMessage("Gracias por tu reporte. La información ha sido registrada y contribuirá a mejorar la seguridad en la zona.\n\n" +
+                          "📋 Resumen del reporte:\n" +
+                          "📂 Categoría: " + category + "\n" +
+                          "🚨 Tipo: " + subtype + "\n" +
+                          severityEmoji + " Gravedad: " + severityText + " (" + severity + "/4)\n\n" +
                           "📊 Tu reporte ayudará a:\n" +
                           "• Identificar zonas de riesgo\n" +
                           "• Alertar a otros usuarios\n" +
@@ -1829,7 +2351,6 @@ public class MainActivity extends AppCompatActivity {
     
     private void toggleStreetCrimeFilter() {
         showStreetCrime = !showStreetCrime;
-        showAllCrimes = false;
         updateCrimeFilterButtons();
         refreshCrimeDisplay();
         
@@ -1839,7 +2360,6 @@ public class MainActivity extends AppCompatActivity {
     
     private void toggleVehicleCrimeFilter() {
         showVehicleCrime = !showVehicleCrime;
-        showAllCrimes = false;
         updateCrimeFilterButtons();
         refreshCrimeDisplay();
         
@@ -1850,13 +2370,10 @@ public class MainActivity extends AppCompatActivity {
     private void updateCrimeFilterButtons() {
         // Actualizar el color de los botones según el estado activo
         streetCrimeFilterButton.setBackgroundTintList(ColorStateList.valueOf(
-            showStreetCrime ? Color.parseColor("#FF5722") : Color.parseColor("#CCCCCC")));
+            showStreetCrime ? Color.parseColor("#F44336") : Color.parseColor("#CCCCCC")));
         
         vehicleCrimeFilterButton.setBackgroundTintList(ColorStateList.valueOf(
             showVehicleCrime ? Color.parseColor("#9C27B0") : Color.parseColor("#CCCCCC")));
-        
-        dangerZonesButton.setBackgroundTintList(ColorStateList.valueOf(
-            showAllCrimes ? Color.parseColor("#FF9800") : Color.parseColor("#CCCCCC")));
     }
     
     private void refreshCrimeDisplay() {
@@ -1871,7 +2388,7 @@ public class MainActivity extends AppCompatActivity {
         
         // Volver a agregar según los filtros activos
         addFilteredCrimeAlertsToMap();
-        if (showAllCrimes || showStreetCrime || showVehicleCrime) {
+        if (showStreetCrime || showVehicleCrime) {
             createFilteredDangerZones();
         }
         
@@ -1883,14 +2400,10 @@ public class MainActivity extends AppCompatActivity {
             if (alert.location == null) continue;
             
             boolean shouldShow = false;
-            if (showAllCrimes) {
+            if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
                 shouldShow = true;
-            } else {
-                if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
-                    shouldShow = true;
-                } else if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
-                    shouldShow = true;
-                }
+            } else if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
+                shouldShow = true;
             }
             
             if (shouldShow) {
@@ -1921,46 +2434,15 @@ public class MainActivity extends AppCompatActivity {
             if (alert.location == null) continue;
             
             boolean shouldShow = false;
-            if (showAllCrimes) {
+            if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
                 shouldShow = true;
-            } else {
-                if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
-                    shouldShow = true;
-                } else if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
-                    shouldShow = true;
-                }
+            } else if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
+                shouldShow = true;
             }
             
             if (shouldShow) {
-                // Radio de zona de peligro según el tipo de crimen
-                double dangerRadius = vehicleMode && "Robo de vehículos".equals(alert.crimeType) ? 
-                    0.003 : 0.002; // Mayor radio para robos de vehículos en modo vehículo
-                
-                Polygon dangerZone = new Polygon();
-                List<GeoPoint> circlePoints = new ArrayList<>();
-                
-                for (int i = 0; i <= 36; i++) {
-                    double angle = i * 10 * Math.PI / 180;
-                    double lat = alert.location.getLatitude() + dangerRadius * Math.cos(angle);
-                    double lon = alert.location.getLongitude() + dangerRadius * Math.sin(angle);
-                    circlePoints.add(new GeoPoint(lat, lon));
-                }
-                
-                dangerZone.setPoints(circlePoints);
-                
-                if ("Crimen en vía pública".equals(alert.crimeType)) {
-                    dangerZone.setFillColor(Color.argb(50, 255, 87, 34)); // Rojo transparente
-                    dangerZone.setStrokeColor(Color.argb(100, 255, 87, 34));
-                } else if ("Robo de vehículos".equals(alert.crimeType)) {
-                    dangerZone.setFillColor(Color.argb(50, 156, 39, 176)); // Morado transparente
-                    dangerZone.setStrokeColor(Color.argb(100, 156, 39, 176));
-                }
-                
-                dangerZone.setStrokeWidth(2.0f);
-                dangerZone.setTitle("Zona de peligro: " + alert.crimeType);
-                
-                map.getOverlays().add(dangerZone);
-                dangerZoneOverlays.add(dangerZone);
+                // Usar la nueva función que considera la gravedad
+                createDangerZone(alert.location, alert.severity);
             }
         }
     }
