@@ -61,13 +61,6 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton menuButton, zoomInButton, zoomOutButton,
             streetCrimeFilterButton, vehicleCrimeFilterButton;
     private Button reportCrimeButton;
-    
-    // Sistema de puntos
-    private TextView pointsTextView;
-    private Button exchangePointsButton;
-    private int userPoints = 0;
-    private static final String PREFS_NAME = "SafeRoutePrefs";
-    private static final String KEY_POINTS = "user_points";
 
     private final String MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoibHVjYXNhZzA1IiwiYSI6ImNtZ3poaTdxMDAwOGcyaXBxYWRvYzJkanIifQ.2tJ3eYfxB8W5NbeQTKNHwA";
 
@@ -112,11 +105,10 @@ public class MainActivity extends AppCompatActivity {
         final String category; // "Delitos contra las personas" o "Delitos contra la propiedad"
         final String subType; // Subtipo específico del crimen
         final int severity; // Gravedad: 1 (leve) a 4 (grave)
-        final boolean isActive; // true = activo (afecta rutas), false = inactivo (solo visual)
         GeoPoint location; // Se establecerá después de la geocodificación
 
         CrimeAlert(String title, String description, String address, String timeAgo, String crimeType, 
-                   String category, String subType, int severity, boolean isActive) {
+                   String category, String subType, int severity) {
             this.title = title;
             this.description = description;
             this.address = address;
@@ -125,14 +117,7 @@ public class MainActivity extends AppCompatActivity {
             this.category = category;
             this.subType = subType;
             this.severity = severity;
-            this.isActive = isActive;
             this.location = null; // Se establecerá más tarde
-        }
-        
-        // Constructor de compatibilidad (por defecto activo)
-        CrimeAlert(String title, String description, String address, String timeAgo, String crimeType, 
-                   String category, String subType, int severity) {
-            this(title, description, address, timeAgo, crimeType, category, subType, severity, true);
         }
         
         // Método auxiliar para obtener el color según la gravedad
@@ -161,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
     private final List<SafePoint> safePoints = new ArrayList<>();
     private final List<Marker> safePointMarkers = new ArrayList<>();
     private final List<CrimeAlert> crimeAlerts = new ArrayList<>();
-    private final List<CrimeAlert> inactiveCrimeAlerts = new ArrayList<>();
     private final List<Marker> crimeAlertMarkers = new ArrayList<>();
     private final List<Polygon> dangerZones = new ArrayList<>();
     private final List<Polygon> dangerZoneOverlays = new ArrayList<>();
@@ -250,12 +234,6 @@ public class MainActivity extends AppCompatActivity {
         streetCrimeFilterButton = findViewById(R.id.street_crime_filter_button);
         vehicleCrimeFilterButton = findViewById(R.id.vehicle_crime_filter_button);
         
-        // Inicializar sistema de puntos
-        pointsTextView = findViewById(R.id.points_text_view);
-        exchangePointsButton = findViewById(R.id.exchange_points_button);
-        loadUserPoints();
-        updatePointsDisplay();
-        
         // Inicializar layout y botones de exportar
         exportButtonsLayout = findViewById(R.id.export_buttons_layout);
         exportUberButton = findViewById(R.id.export_uber_button);
@@ -308,11 +286,6 @@ public class MainActivity extends AppCompatActivity {
 
         menuButton.setOnClickListener(v -> Toast.makeText(this, "Botón de Menú presionado", Toast.LENGTH_SHORT).show());
         reportCrimeButton.setOnClickListener(v -> showReportCrimeDialog());
-        
-        exchangePointsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, RewardsActivity.class);
-            startActivity(intent);
-        });
 
         backButton.setOnClickListener(v -> clearRoute());
 
@@ -1756,26 +1729,43 @@ public class MainActivity extends AppCompatActivity {
                 
                 // Una vez que tenemos todas las ubicaciones, agregar los marcadores en el hilo principal
                 runOnUiThread(() -> {
-                    // Agregar marcadores de crímenes ACTIVOS
                     for (CrimeAlert alert : crimeAlerts) {
                         if (alert.location != null) { // Solo agregar si se pudo geocodificar
-                            Marker marker = createCrimeMarker(alert, true); // true = activo
+                            Marker marker = new Marker(map);
+                            marker.setPosition(alert.location);
+                            marker.setTitle(alert.title);
+                            marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
+                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                            
+                            // Seleccionar ícono y color según la categoría del crimen
+                            Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
+                            
+                            if ("Delitos contra la propiedad".equals(alert.category)) {
+                                // Robos de vehículos - Color violeta
+                                if (alertIcon != null) {
+                                    alertIcon.setTint(Color.parseColor("#9C27B0")); // Violeta
+                                }
+                            } else {
+                                // Delitos contra las personas (transeúntes) - Color rojo
+                                if (alertIcon != null) {
+                                    alertIcon.setTint(Color.parseColor("#F44336")); // Rojo
+                                }
+                            }
+                            marker.setIcon(alertIcon);
+                            
+                            // Configurar el click listener para mostrar el diálogo detallado
+                            marker.setOnMarkerClickListener((marker1, mapView) -> {
+                                showCrimeAlertDialog(alert);
+                                return true; // Consumir el evento
+                            });
+
                             map.getOverlays().add(marker);
                             crimeAlertMarkers.add(marker);
+                            
+                            // Agregar animación de rebote al marcador
                             startCrimeAlertAnimation(marker);
                         }
                     }
-                    
-                    // Agregar marcadores de crímenes INACTIVOS
-                    for (CrimeAlert alert : inactiveCrimeAlerts) {
-                        if (alert.location != null) {
-                            Marker marker = createCrimeMarker(alert, false); // false = inactivo
-                            map.getOverlays().add(marker);
-                            crimeAlertMarkers.add(marker);
-                            startCrimeAlertAnimation(marker);
-                        }
-                    }
-                    
                     map.invalidate();
                     
                     // Centrar el mapa en la zona de las alertas si se geocodificaron correctamente
@@ -2150,19 +2140,16 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Función de galería no implementada en la demo", Toast.LENGTH_SHORT).show();
         });
         
-        builder.setPositiveButton("Reportar", null); // Lo configuraremos después
+        builder.setPositiveButton("Enviar Reporte", null); // Lo configuraremos después
         builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
         
         AlertDialog dialog = builder.create();
         dialog.show();
         
-        // Configurar el botón "Reportar" después de mostrar el diálogo
+        // Configurar el botón "Enviar Reporte" después de mostrar el diálogo
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(v -> {
-            System.out.println("\n🟢 BOTÓN PRESIONADO: REPORTAR (INACTIVO)");
-            
             String address = addressInput.getText().toString().trim();
-            String description = incidentDescriptionInput.getText().toString().trim();
             String time = timeInput.getText().toString().trim();
             String category = (String) categorySpinner.getSelectedItem();
             String subtype = (String) subtypeSpinner.getSelectedItem();
@@ -2182,22 +2169,7 @@ public class MainActivity extends AppCompatActivity {
             Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(category);
             int severity = subtypes.get(subtype);
             
-            // Crear alerta de crimen INACTIVA (siempre inactiva al reportar)
-            CrimeAlert newAlert = new CrimeAlert(
-                subtype,
-                description.isEmpty() ? "Incidente reportado" : description,
-                address,
-                time,
-                category,
-                category,
-                subtype,
-                severity,
-                false // INACTIVO - no afecta las rutas hasta que sea apoyado
-            );
-            
-            // Geocodificar y agregar a la lista de alertas inactivas
-            geocodeCrimeAlert(newAlert, false);
-            
+            // Simular envío del reporte
             dialog.dismiss();
             showReportSuccessDialog(category, subtype, severity);
         });
@@ -2231,290 +2203,21 @@ public class MainActivity extends AppCompatActivity {
                 severityText = "Desconocido";
         }
         
-        builder.setMessage("Tu reporte ha sido registrado y aparecerá en el mapa.\n\n" +
+        builder.setMessage("Gracias por tu reporte. La información ha sido registrada y contribuirá a mejorar la seguridad en la zona.\n\n" +
                           "📋 Resumen del reporte:\n" +
                           "📂 Categoría: " + category + "\n" +
                           "🚨 Tipo: " + subtype + "\n" +
                           severityEmoji + " Gravedad: " + severityText + " (" + severity + "/4)\n\n" +
-                          "🟢 ESTADO INICIAL: INACTIVO\n" +
-                          "• Se mostrará con triángulo verde\n" +
-                          "• NO afectará las rutas hasta ser verificado\n" +
-                          "• Otros usuarios podrán apoyar o dudar del reporte\n\n" +
-                          "💡 Si otros usuarios apoyan tu reporte, se activará\n" +
-                          "automáticamente y comenzará a afectar las rutas.\n\n" +
-                          "🔒 Toda la información es confidencial.");
+                          "📊 Tu reporte ayudará a:\n" +
+                          "• Identificar zonas de riesgo\n" +
+                          "• Alertar a otros usuarios\n" +
+                          "• Mejorar las rutas seguras\n\n" +
+                          "🔒 Toda la información es tratada de forma confidencial.");
         builder.setPositiveButton("Entendido", (dialog, which) -> dialog.dismiss());
-        builder.setIcon(R.drawable.ic_inactive_crime);
+        builder.setIcon(R.drawable.ic_alert_warning);
         
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-    
-    private void geocodeCrimeAlert(CrimeAlert alert, boolean isActive) {
-        System.out.println("\n🌍 GEOCODIFICANDO CRIMEN: " + alert.title);
-        System.out.println("   Estado solicitado: " + (isActive ? "ACTIVO" : "INACTIVO"));
-        System.out.println("   Dirección: " + alert.address);
-        
-        new Thread(() -> {
-            try {
-                GeoPoint location = getGeoPointFromAddress(alert.address);
-                if (location != null) {
-                    alert.location = location;
-                    System.out.println("   ✓ Ubicación obtenida: " + location.getLatitude() + ", " + location.getLongitude());
-                    
-                    // Agregar a la lista correspondiente
-                    if (isActive) {
-                        crimeAlerts.add(alert);
-                        System.out.println("   ✓ Agregado a crimeAlerts (ACTIVOS). Total activos: " + crimeAlerts.size());
-                    } else {
-                        inactiveCrimeAlerts.add(alert);
-                        System.out.println("   ✓ Agregado a inactiveCrimeAlerts (INACTIVOS). Total inactivos: " + inactiveCrimeAlerts.size());
-                    }
-                    
-                    runOnUiThread(() -> {
-                        System.out.println("   📍 Creando marcador en UI thread...");
-                        
-                        // Agregar marcador en el mapa
-                        Marker marker = createCrimeMarker(alert, isActive);
-                        map.getOverlays().add(marker);
-                        crimeAlertMarkers.add(marker);
-                        
-                        System.out.println("   ✓ Marcador agregado. Total marcadores: " + crimeAlertMarkers.size());
-                        
-                        // Si es activo, crear zona de peligro
-                        if (isActive) {
-                            createDangerZone(alert.location, alert.severity);
-                            System.out.println("   🔴 Zona de peligro creada (ACTIVO)");
-                        } else {
-                            System.out.println("   🟢 Sin zona de peligro (INACTIVO)");
-                        }
-                        
-                        // Animar el marcador
-                        startCrimeAlertAnimation(marker);
-                        
-                        // Centrar el mapa en el nuevo marcador
-                        IMapController mapController = map.getController();
-                        mapController.animateTo(alert.location);
-                        
-                        map.invalidate();
-                        
-                        String message = isActive ? 
-                            "✅ Alerta ACTIVA agregada (afecta rutas)" : 
-                            "✅ Alerta INACTIVA agregada (no afecta rutas)";
-                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
-                        
-                        System.out.println("   ✅ PROCESO COMPLETO\n");
-                    });
-                } else {
-                    System.out.println("   ✗ No se pudo geocodificar");
-                    runOnUiThread(() -> 
-                        Toast.makeText(MainActivity.this, 
-                            "❌ No se pudo geocodificar la dirección", 
-                            Toast.LENGTH_LONG).show()
-                    );
-                }
-            } catch (Exception e) {
-                System.out.println("   ✗ ERROR: " + e.getMessage());
-                e.printStackTrace();
-                runOnUiThread(() -> 
-                    Toast.makeText(MainActivity.this, 
-                        "❌ Error al geocodificar: " + e.getMessage(), 
-                        Toast.LENGTH_LONG).show()
-                );
-            }
-        }).start();
-    }
-    
-    private Marker createCrimeMarker(CrimeAlert alert, boolean isActive) {
-        System.out.println("🔧 Creando marcador: " + alert.title + " | Activo: " + isActive);
-        
-        Marker marker = new Marker(map);
-        marker.setPosition(alert.location);
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        
-        if (isActive) {
-            System.out.println("  ➡️ Marcador ACTIVO: ícono rojo/violeta");
-            // Marcador rojo para crímenes activos
-            marker.setTitle("⚠️ " + alert.title);
-            marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
-            marker.setSubDescription(alert.description + "\n" + alert.timeAgo);
-            
-            Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
-            if ("Delitos contra la propiedad".equals(alert.category)) {
-                // Robos de vehículos - Color violeta
-                if (alertIcon != null) {
-                    alertIcon.setTint(Color.parseColor("#9C27B0")); // Violeta
-                }
-            } else {
-                // Delitos contra las personas - Color rojo
-                if (alertIcon != null) {
-                    alertIcon.setTint(Color.parseColor("#F44336")); // Rojo
-                }
-            }
-            marker.setIcon(alertIcon);
-            
-            // Click listener para mostrar diálogo
-            marker.setOnMarkerClickListener((marker1, mapView) -> {
-                showCrimeAlertDialog(alert);
-                return true;
-            });
-        } else {
-            System.out.println("  ➡️ Marcador INACTIVO: triángulo verde");
-            
-            // Triángulo verde para crímenes inactivos
-            marker.setTitle("📍 " + alert.title + " (Inactivo)");
-            marker.setSnippet(alert.timeAgo + " - Inactivo");
-            marker.setSubDescription(alert.description + "\n" + alert.timeAgo + "\n\n⚪ Este incidente NO afecta las rutas");
-            
-            Drawable inactiveIcon = ContextCompat.getDrawable(this, R.drawable.ic_inactive_crime);
-            System.out.println("  🎨 Ícono inactivo cargado: " + (inactiveIcon != null ? "✓" : "✗"));
-            marker.setIcon(inactiveIcon);
-            
-            // Click listener para mostrar diálogo
-            marker.setOnMarkerClickListener((marker1, mapView) -> {
-                showInactiveCrimeDialog(alert);
-                return true;
-            });
-        }
-        
-        return marker;
-    }
-    
-    private void showInactiveCrimeDialog(CrimeAlert alert) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("📍 Incidente Reportado (Pendiente de Verificación)");
-        
-        String severityEmoji;
-        String severityText;
-        switch (alert.severity) {
-            case 4:
-                severityEmoji = "🔴";
-                severityText = "Muy Grave";
-                break;
-            case 3:
-                severityEmoji = "🟠";
-                severityText = "Grave";
-                break;
-            case 2:
-                severityEmoji = "🟡";
-                severityText = "Moderado";
-                break;
-            case 1:
-                severityEmoji = "🟢";
-                severityText = "Leve";
-                break;
-            default:
-                severityEmoji = "⚪";
-                severityText = "Desconocido";
-        }
-        
-        builder.setMessage(
-            "🚨 Tipo: " + alert.subType + "\n" +
-            severityEmoji + " Gravedad: " + severityText + " (" + alert.severity + "/4)\n" +
-            "📍 Ubicación: " + alert.address + "\n" +
-            "🕐 " + alert.timeAgo + "\n\n" +
-            "📝 Descripción:\n" + alert.description + "\n\n" +
-            "⚪ ESTADO: INACTIVO (Pendiente)\n" +
-            "Este incidente fue reportado pero aún no está verificado.\n" +
-            "Actualmente NO afecta el cálculo de rutas.\n\n" +
-            "¿Qué deseas hacer con este reporte?"
-        );
-        
-        builder.setPositiveButton("✅ Apoyar", (dialog, which) -> {
-            activateCrimeAlert(alert);
-            dialog.dismiss();
-        });
-        
-        builder.setNegativeButton("❌ Dudar", (dialog, which) -> {
-            removeCrimeAlert(alert);
-            dialog.dismiss();
-        });
-        
-        builder.setNeutralButton("Cancelar", (dialog, which) -> dialog.dismiss());
-        
-        builder.setIcon(R.drawable.ic_inactive_crime);
-        
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-    
-    private void activateCrimeAlert(CrimeAlert alert) {
-        // Remover de la lista de inactivos
-        inactiveCrimeAlerts.remove(alert);
-        
-        // Crear nueva alerta ACTIVA con los mismos datos
-        CrimeAlert activeAlert = new CrimeAlert(
-            alert.title,
-            alert.description,
-            alert.address,
-            alert.timeAgo,
-            alert.crimeType,
-            alert.category,
-            alert.subType,
-            alert.severity,
-            true // ACTIVO
-        );
-        activeAlert.location = alert.location; // Mantener la ubicación geocodificada
-        
-        // Agregar a la lista de activos
-        crimeAlerts.add(activeAlert);
-        
-        // Actualizar el mapa
-        refreshCrimeMarkers();
-        
-        // Crear zona de peligro
-        createDangerZone(activeAlert.location, activeAlert.severity);
-        
-        // ⭐ RECOMPENSAR AL USUARIO CON 100 PUNTOS
-        addPoints(100);
-        
-        Toast.makeText(this, "✅ Incidente activado - Ahora afecta las rutas seguras", Toast.LENGTH_LONG).show();
-    }
-    
-    private void removeCrimeAlert(CrimeAlert alert) {
-        // Remover de la lista correspondiente
-        inactiveCrimeAlerts.remove(alert);
-        
-        // Actualizar el mapa
-        refreshCrimeMarkers();
-        
-        Toast.makeText(this, "❌ Incidente eliminado", Toast.LENGTH_SHORT).show();
-    }
-    
-    private void refreshCrimeMarkers() {
-        // Limpiar todos los marcadores de crímenes
-        for (Marker marker : crimeAlertMarkers) {
-            map.getOverlays().remove(marker);
-        }
-        crimeAlertMarkers.clear();
-        
-        // Limpiar zonas de peligro
-        hideDangerZones();
-        
-        // Volver a agregar marcadores activos
-        for (CrimeAlert alert : crimeAlerts) {
-            if (alert.location != null) {
-                Marker marker = createCrimeMarker(alert, true);
-                map.getOverlays().add(marker);
-                crimeAlertMarkers.add(marker);
-                startCrimeAlertAnimation(marker);
-            }
-        }
-        
-        // Volver a agregar marcadores inactivos
-        for (CrimeAlert alert : inactiveCrimeAlerts) {
-            if (alert.location != null) {
-                Marker marker = createCrimeMarker(alert, false);
-                map.getOverlays().add(marker);
-                crimeAlertMarkers.add(marker);
-                startCrimeAlertAnimation(marker);
-            }
-        }
-        
-        // Recrear zonas de peligro solo para activos
-        createDangerZones();
-        
-        map.invalidate();
     }
 
     
@@ -2744,48 +2447,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ========== SISTEMA DE PUNTOS ==========
-    
-    private void loadUserPoints() {
-        android.content.SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        userPoints = prefs.getInt(KEY_POINTS, 0);
-    }
-    
-    private void saveUserPoints() {
-        android.content.SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putInt(KEY_POINTS, userPoints).apply();
-    }
-    
-    private void updatePointsDisplay() {
-        pointsTextView.setText("⭐ " + userPoints + " puntos");
-    }
-    
-    private void addPoints(int points) {
-        userPoints += points;
-        saveUserPoints();
-        animatePointsIncrease(points);
-        updatePointsDisplay();
-    }
-    
-    private void animatePointsIncrease(int points) {
-        // Animación de escala
-        pointsTextView.animate()
-            .scaleX(1.5f)
-            .scaleY(1.5f)
-            .setDuration(200)
-            .withEndAction(() -> {
-                pointsTextView.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .setDuration(200)
-                    .start();
-            })
-            .start();
-        
-        // Toast llamativo
-        Toast.makeText(this, "🎉 +" + points + " puntos ganados! 🎉", Toast.LENGTH_LONG).show();
-    }
-    
     @Override
     public void onBackPressed() {
         // Si hay una ruta activa (panel de información visible), limpiar la ruta
@@ -2801,9 +2462,6 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         map.onResume();
-        // Recargar puntos al volver del RewardsActivity
-        loadUserPoints();
-        updatePointsDisplay();
     }
 
     @Override

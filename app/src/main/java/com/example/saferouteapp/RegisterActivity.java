@@ -1,6 +1,5 @@
 package com.example.saferouteapp;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,17 +8,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     private Button registerButton;
     private TextView loginTextView;
-
-    // Lista hardcodeada de usuarios registrados (simulación)
-    private static final String[] REGISTERED_EMAILS = {
-            "usuario@saferoute.com",
-            "admin@saferoute.com"
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +31,10 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.register_button);
         loginTextView = findViewById(R.id.login_text_view);
 
-        // Configurar botón de registro
+        // Botón de registro
         registerButton.setOnClickListener(v -> attemptRegister());
 
-        // Configurar link de login
+        // Link para volver al login
         loginTextView.setOnClickListener(v -> {
             finish(); // Volver a LoginActivity
         });
@@ -86,21 +83,37 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Verificar si el email ya está registrado
-        for (String registeredEmail : REGISTERED_EMAILS) {
-            if (email.equalsIgnoreCase(registeredEmail)) {
-                emailEditText.setError("Este email ya está registrado");
-                emailEditText.requestFocus();
-                Toast.makeText(this, "El email ya existe. Intenta iniciar sesión.", Toast.LENGTH_LONG).show();
-                return;
+        // Armar request para el backend
+        // Por ahora mandamos surname vacío (""); si después agregan campo "apellido", lo completan.
+        RegisterRequest request = new RegisterRequest(
+                email,      // mail
+                password,   // password
+                name,       // name
+                ""          // surname
+        );
+
+        // Llamar a la API de registro
+        ApiClient.getService().register(request).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(RegisterActivity.this,
+                            "¡Registro exitoso! Ahora puedes iniciar sesión.",
+                            Toast.LENGTH_LONG).show();
+                    finish(); // Volver a LoginActivity
+                } else {
+                    Toast.makeText(RegisterActivity.this,
+                            "No se pudo registrar. Probá con otro email o más tarde.",
+                            Toast.LENGTH_LONG).show();
+                }
             }
-        }
 
-        // Registro exitoso (simulado)
-        Toast.makeText(this, "¡Registro exitoso! Ahora puedes iniciar sesión.", Toast.LENGTH_LONG).show();
-
-        // Volver a LoginActivity
-        finish();
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(RegisterActivity.this,
+                        "Error de conexión: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
-

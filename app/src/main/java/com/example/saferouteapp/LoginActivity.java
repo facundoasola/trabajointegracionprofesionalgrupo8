@@ -9,15 +9,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton;
     private TextView registerTextView, forgotPasswordTextView;
-
-    // Credenciales hardcodeadas
-    private static final String HARDCODED_EMAIL = "usuario@saferoute.com";
-    private static final String HARDCODED_PASSWORD = "123456";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,19 +31,18 @@ public class LoginActivity extends AppCompatActivity {
         registerTextView = findViewById(R.id.register_text_view);
         forgotPasswordTextView = findViewById(R.id.forgot_password_text_view);
 
-        // Configurar botón de login
+        // Botón LOGIN
         loginButton.setOnClickListener(v -> attemptLogin());
 
-        // Configurar link de registro
+        // Link REGISTRARSE
         registerTextView.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
 
-        // Configurar link de olvidé contraseña
-        forgotPasswordTextView.setOnClickListener(v -> {
-            Toast.makeText(this, "Funcionalidad en desarrollo", Toast.LENGTH_SHORT).show();
-        });
+        // Link OLVIDÉ CONTRASEÑA
+        forgotPasswordTextView.setOnClickListener(v ->
+                Toast.makeText(this, "Funcionalidad en desarrollo", Toast.LENGTH_SHORT).show());
     }
 
     private void attemptLogin() {
@@ -63,18 +62,44 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Validar con credenciales hardcodeadas
-        if (email.equals(HARDCODED_EMAIL) && password.equals(HARDCODED_PASSWORD)) {
-            Toast.makeText(this, "¡Bienvenido!", Toast.LENGTH_SHORT).show();
+        // Armamos la request para el backend
+        LoginRequest request = new LoginRequest(email, password);
 
-            // Ir a MainActivity
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish(); // Cerrar LoginActivity
-        } else {
-            Toast.makeText(this, "Email o contraseña incorrectos", Toast.LENGTH_LONG).show();
-            passwordEditText.setText("");
-        }
+        // Llamamos al backend
+        ApiClient.getService().login(request).enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    UserResponse user = response.body();
+
+                    // Guardar el usuario en sesión
+                    UserSession.setCurrentUser(user);
+
+                    Toast.makeText(LoginActivity.this,
+                            "¡Bienvenido " + user.name + "!",
+                            Toast.LENGTH_SHORT).show();
+
+                    // Ir a MainActivity
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                } else {
+                    Toast.makeText(LoginActivity.this,
+                            "Email o contraseña incorrectos",
+                            Toast.LENGTH_LONG).show();
+                    passwordEditText.setText("");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                Toast.makeText(LoginActivity.this,
+                        "Error de conexión: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
-

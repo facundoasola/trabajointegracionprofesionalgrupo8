@@ -1,9 +1,5 @@
 [
     {
-        "merged": "com.example.saferouteapp-debug-36:/layout_activity_rewards.xml.flat",
-        "source": "com.example.saferouteapp-main-38:/layout/activity_rewards.xml"
-    },
-    {
         "merged": "com.example.saferouteapp-debug-36:/drawable_splash_screen.xml.flat",
         "source": "com.example.saferouteapp-main-38:/drawable/splash_screen.xml"
     },
@@ -32,16 +28,16 @@
         "source": "com.example.saferouteapp-main-38:/mipmap-xxxhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "com.example.saferouteapp-main-38:/drawable/ic_launcher_foreground.xml"
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_safe_route.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_safe_route.xml"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/drawable_ic_vehicle.xml.flat",
         "source": "com.example.saferouteapp-main-38:/drawable/ic_vehicle.xml"
     },
     {
-        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_safe_route.xml.flat",
-        "source": "com.example.saferouteapp-main-38:/drawable/ic_safe_route.xml"
+        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.saferouteapp-main-38:/drawable/ic_launcher_foreground.xml"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
@@ -50,10 +46,6 @@
     {
         "merged": "com.example.saferouteapp-debug-36:/drawable_ic_my_location.xml.flat",
         "source": "com.example.saferouteapp-main-38:/drawable/ic_my_location.xml"
-    },
-    {
-        "merged": "com.example.saferouteapp-debug-36:/drawable_ic_inactive_crime.xml.flat",
-        "source": "com.example.saferouteapp-main-38:/drawable/ic_inactive_crime.xml"
     },
     {
         "merged": "com.example.saferouteapp-debug-36:/mipmap-anydpi-v26_ic_launcher.xml.flat",
