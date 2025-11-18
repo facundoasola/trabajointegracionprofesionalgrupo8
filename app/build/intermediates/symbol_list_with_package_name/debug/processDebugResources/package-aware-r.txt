@@ -2938,6 +2938,7 @@ drawable ic_clear_black_24
 drawable ic_clock_black_24dp
 drawable ic_destination_marker
 drawable ic_hospital
+drawable ic_inactive_crime
 drawable ic_keyboard_black_24dp
 drawable ic_launcher_background
 drawable ic_launcher_foreground
@@ -3163,6 +3164,9 @@ id bubble_image
 id bubble_moreinfo
 id bubble_subdescription
 id bubble_title
+id burger_king_card
+id burger_king_image
+id burger_king_redeem
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3247,6 +3251,7 @@ id end
 id endToStart
 id enterAlways
 id enterAlwaysCollapsed
+id exchange_points_button
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
@@ -3420,6 +3425,7 @@ id pathRelative
 id peekHeight
 id percent
 id pin
+id points_text_view
 id position
 id postLayout
 id pressed
@@ -3433,6 +3439,8 @@ id register_text_view
 id report_crime_button
 id report_drawn
 id reverseSawtooth
+id rewards_back_button
+id rewards_points_text
 id right
 id rightToLeft
 id right_icon
@@ -3595,6 +3603,12 @@ id wrap_content
 id wrap_content_constrained
 id x_left
 id x_right
+id ypf_card
+id ypf_image
+id ypf_redeem
+id zara_card
+id zara_image
+id zara_redeem
 id zoom_in_button
 id zoom_out_button
 integer abc_config_activityDefaultDur
@@ -3713,6 +3727,7 @@ layout abc_tooltip
 layout activity_login
 layout activity_main
 layout activity_register
+layout activity_rewards
 layout bonuspack_bubble
 layout custom_dialog
 layout design_bottom_navigation_item

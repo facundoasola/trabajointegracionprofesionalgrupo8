@@ -77,6 +77,12 @@
             android:name="com.example.saferouteapp.MainActivity"
             android:exported="false" />
 
+        <!-- Rewards Activity - Pantalla de intercambio de puntos -->
+        <activity
+            android:name="com.example.saferouteapp.RewardsActivity"
+            android:exported="false"
+            android:parentActivityName="com.example.saferouteapp.MainActivity" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="com.example.saferouteapp.androidx-startup"

@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-48:12
-INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-48:12
-INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-48:12
-INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-48:12
+ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-54:12
+INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-54:12
+INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-54:12
+INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:2:1-54:12
 MERGED from [com.google.android.material:material:1.9.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\74170f345689157344f433b5912e98f5\transformed\material-1.9.0\AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e80498510da49802fa38a4a6d2a74bf6\transformed\constraintlayout-2.1.4\AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\7736da1c6882ac0a396d2d49578aecd6\transformed\appcompat-resources-1.6.1\AndroidManifest.xml:17:1-22:12
@@ -77,8 +77,8 @@ ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\ma
 	android:name
 		ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:9:22-76
 application
-ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:11:5-46:19
-INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:11:5-46:19
+ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:11:5-52:19
+INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:11:5-52:19
 MERGED from [com.google.android.material:material:1.9.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\74170f345689157344f433b5912e98f5\transformed\material-1.9.0\AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.9.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\74170f345689157344f433b5912e98f5\transformed\material-1.9.0\AndroidManifest.xml:24:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e80498510da49802fa38a4a6d2a74bf6\transformed\constraintlayout-2.1.4\AndroidManifest.xml:9:5-20
@@ -153,6 +153,14 @@ ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\ma
 		ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:44:13-37
 	android:name
 		ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:43:13-41
+activity#com.example.saferouteapp.RewardsActivity
+ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:47:9-50:58
+	android:parentActivityName
+		ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:50:13-55
+	android:exported
+		ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:49:13-37
+	android:name
+		ADDED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml:48:13-44
 uses-sdk
 INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\facun\Desktop\Trabajo grupo final xd\SafeRouteApp\app\src\main\AndroidManifest.xml

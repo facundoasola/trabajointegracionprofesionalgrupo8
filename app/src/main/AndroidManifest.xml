@@ -42,6 +42,12 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+        
+        <!-- Rewards Activity - Pantalla de intercambio de puntos -->
+        <activity
+            android:name=".RewardsActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
 
     </application>
 

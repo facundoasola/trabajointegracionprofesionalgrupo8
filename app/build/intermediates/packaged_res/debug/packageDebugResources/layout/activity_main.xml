@@ -24,6 +24,40 @@
         app:backgroundTint="@android:color/white"
         app:tint="@android:color/black"
         app:fabSize="mini"/>
+    
+    <!-- Sistema de Puntos (Debajo del botón de menú) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/menu_button"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_background"
+        android:padding="12dp"
+        android:elevation="4dp">
+        
+        <TextView
+            android:id="@+id/points_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⭐ 0 puntos"
+            android:textColor="#FFC107"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+        
+        <Button
+            android:id="@+id/exchange_points_button"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Intercambiar puntos"
+            android:textSize="12sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:backgroundTint="#4CAF50"/>
+    </LinearLayout>
 
     <!-- Botón de Reportar Crimen (Superior Derecha) -->
     <Button
