@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-48:12
-INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-48:12
-INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-48:12
-INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-48:12
+ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-72:12
+INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-72:12
+INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-72:12
+INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:2:1-72:12
 MERGED from [com.google.android.material:material:1.9.0] /Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/217e011d2470175b7bb5701e8ebb040d/transformed/material-1.9.0/AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/4648d66fc0288974d8e2ad38779d8d35/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/2e61ee85b717901566137146fee15228/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
@@ -77,8 +77,8 @@ ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/a
 	android:name
 		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:9:22-76
 application
-ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:11:5-46:19
-INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:11:5-46:19
+ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:11:5-70:19
+INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:11:5-70:19
 MERGED from [com.google.android.material:material:1.9.0] /Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/217e011d2470175b7bb5701e8ebb040d/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.9.0] /Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/217e011d2470175b7bb5701e8ebb040d/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/4648d66fc0288974d8e2ad38779d8d35/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -153,6 +153,38 @@ ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/a
 		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:44:13-37
 	android:name
 		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:43:13-41
+activity#com.example.saferouteapp.MenuActivity
+ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:47:9-50:57
+	android:exported
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:49:13-37
+	android:theme
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:50:13-54
+	android:name
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:48:13-41
+activity#com.example.saferouteapp.PointsActivity
+ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:53:9-56:57
+	android:exported
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:55:13-37
+	android:theme
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:56:13-54
+	android:name
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:54:13-43
+activity#com.example.saferouteapp.PendingReportsActivity
+ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:59:9-62:57
+	android:exported
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:61:13-37
+	android:theme
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:62:13-54
+	android:name
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:60:13-51
+activity#com.example.saferouteapp.MyCrimesActivity
+ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:65:9-68:57
+	android:exported
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:67:13-37
+	android:theme
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:68:13-54
+	android:name
+		ADDED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml:66:13-45
 uses-sdk
 INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/lucasgima/Downloads/trabajointegracionprofesionalgrupo8-main/app/src/main/AndroidManifest.xml

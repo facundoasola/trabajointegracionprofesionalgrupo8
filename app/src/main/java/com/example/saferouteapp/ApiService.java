@@ -1,26 +1,32 @@
 package com.example.saferouteapp;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public interface ApiService {
 
-    // LOGIN: devuelve los datos del usuario + puntos
-    @POST("login")
+    @POST("api/login")
     Call<UserResponse> login(@Body LoginRequest request);
 
-    // REGISTER: solo interesa si fue bien o no, el back no devuelve JSON
-    @POST("register")
-    Call<Void> register(@Body RegisterRequest request);
+    @POST("api/register")
+    Call<UserResponse> register(@Body RegisterRequest request);
 
-    // OBTENER USUARIO POR MAIL (para refrescar puntos, etc.)
-    @POST("usuario")
+    @POST("api/usuarios")
     Call<UserResponse> getUsuario(@Body UserMailRequest request);
 
-    // Más adelante agregamos acá los endpoints de crímenes:
-    // @GET("crimenes")
-    // @POST("crimen-nuevo")
-    // @POST("verificacion-crimen")
-    // @POST("confirmacion-crimen")
+    @GET("api/crimenes")
+    Call<List<CrimeDto>> getCrimenes();
+
+    @POST("api/crimen-nuevo")
+    Call<CrimeDto> crearCrimen(@Body CrimeCreateRequest request);
+
+    @POST("api/verificacion-crimen")
+    Call<Void> verificarCrimen(@Body CrimeVerifyRequest request);
+
+    @POST("api/confirmacion-crimen")
+    Call<Void> confirmarCrimen(@Body CrimeIdRequest request);
 }

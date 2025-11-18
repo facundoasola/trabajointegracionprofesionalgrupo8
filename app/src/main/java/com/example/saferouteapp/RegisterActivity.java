@@ -1,5 +1,6 @@
 package com.example.saferouteapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -8,13 +9,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
+    private EditText nameEditText, surnameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     private Button registerButton;
     private TextView loginTextView;
 
@@ -25,6 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Inicializar vistas
         nameEditText = findViewById(R.id.name_edit_text);
+        surnameEditText = findViewById(R.id.surname_edit_text);
         emailEditText = findViewById(R.id.email_edit_text);
         passwordEditText = findViewById(R.id.password_edit_text);
         confirmPasswordEditText = findViewById(R.id.confirm_password_edit_text);
@@ -42,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void attemptRegister() {
         String name = nameEditText.getText().toString().trim();
+        String surname = surnameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
@@ -50,6 +55,12 @@ public class RegisterActivity extends AppCompatActivity {
         if (name.isEmpty()) {
             nameEditText.setError("Ingresa tu nombre");
             nameEditText.requestFocus();
+            return;
+        }
+
+        if (surname.isEmpty()) {
+            surnameEditText.setError("Ingresa tu apellido");
+            surnameEditText.requestFocus();
             return;
         }
 
@@ -84,32 +95,39 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         // Armar request para el backend
-        // Por ahora mandamos surname vacío (""); si después agregan campo "apellido", lo completan.
         RegisterRequest request = new RegisterRequest(
                 email,      // mail
                 password,   // password
                 name,       // name
-                ""          // surname
+                surname     // surname
         );
 
         // Llamar a la API de registro
-        ApiClient.getService().register(request).enqueue(new Callback<Void>() {
+        ApiClient.getService().register(request).enqueue(new Callback<UserResponse>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UserResponse newUser = response.body();
+
                     Toast.makeText(RegisterActivity.this,
-                            "¡Registro exitoso! Ahora puedes iniciar sesión.",
+                            "¡Registro exitoso! Bienvenido " + newUser.name,
                             Toast.LENGTH_LONG).show();
-                    finish(); // Volver a LoginActivity
+
+                    // Guardar usuario en sesión y ir directamente al mapa
+                    UserSession.setCurrentUser(newUser);
+
+                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
                     Toast.makeText(RegisterActivity.this,
-                            "No se pudo registrar. Probá con otro email o más tarde.",
+                            "Error en el registro. Verifica tus datos.",
                             Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<UserResponse> call, Throwable t) {
                 Toast.makeText(RegisterActivity.this,
                         "Error de conexión: " + t.getMessage(),
                         Toast.LENGTH_LONG).show();

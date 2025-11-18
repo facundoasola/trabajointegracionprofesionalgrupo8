@@ -77,6 +77,30 @@
             android:name="com.example.saferouteapp.MainActivity"
             android:exported="false" />
 
+        <!-- Menu Activity - Menú principal -->
+        <activity
+            android:name="com.example.saferouteapp.MenuActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- Points Activity - Ver puntos del usuario -->
+        <activity
+            android:name="com.example.saferouteapp.PointsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- Pending Reports Activity - Verificar reportes -->
+        <activity
+            android:name="com.example.saferouteapp.PendingReportsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- My Crimes Activity - Mis reportes -->
+        <activity
+            android:name="com.example.saferouteapp.MyCrimesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="com.example.saferouteapp.androidx-startup"

@@ -110,18 +110,6 @@
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:backgroundTint="#2196F3"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Info de prueba -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📝 Datos de prueba:\nEmail: usuario@saferoute.com\nContraseña: 123456"
-            android:textSize="12sp"
-            android:textColor="#9E9E9E"
-            android:gravity="center"
-            android:padding="12dp"
-            android:background="#F5F5F5"
             android:layout_marginBottom="24dp" />
 
         <!-- Divisor -->

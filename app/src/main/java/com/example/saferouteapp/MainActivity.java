@@ -37,7 +37,6 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 
 import java.io.BufferedReader;
@@ -51,6 +50,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private MapView map;
@@ -171,12 +174,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Configuration.getInstance().load(getApplicationContext(), getSharedPreferences("OSM", MODE_PRIVATE));
-        Configuration.getInstance().setUserAgentValue(getPackageName());
 
-        setContentView(R.layout.activity_main);
+        android.util.Log.d("MainActivity", "=== INICIO onCreate ===");
 
-        map = findViewById(R.id.map);
+        // Verificar que haya usuario logueado
+        if (UserSession.getCurrentUser() == null) {
+            android.util.Log.e("MainActivity", "ERROR: No hay usuario en sesión");
+            Toast.makeText(this, "Por favor, inicia sesión", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        android.util.Log.d("MainActivity", "Usuario logueado: " + UserSession.getCurrentUserMail());
+
+        try {
+            android.util.Log.d("MainActivity", "1. Configurando OSMDroid...");
+            Configuration.getInstance().load(getApplicationContext(), getSharedPreferences("OSM", MODE_PRIVATE));
+            Configuration.getInstance().setUserAgentValue(getPackageName());
+
+            android.util.Log.d("MainActivity", "2. Inflando layout...");
+            setContentView(R.layout.activity_main);
+
+            android.util.Log.d("MainActivity", "3. Inicializando mapa...");
+            map = findViewById(R.id.map);
+            if (map == null) {
+                throw new RuntimeException("ERROR: MapView no encontrado en el layout");
+            }
 
         final XYTileSource mapboxTileSource = new XYTileSource("Mapbox", 0, 22, 256, ".png",
                 new String[] { "https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/" }) {
@@ -211,12 +236,18 @@ public class MainActivity extends AppCompatActivity {
         // Centro inicial en la ubicación del usuario
         mapController.setCenter(currentUserLocation);
 
+        android.util.Log.d("MainActivity", "4. Inicializando campos de texto...");
         originEditText = findViewById(R.id.origin_text);
         destinationEditText = findViewById(R.id.destination_text);
         
+        if (originEditText == null || destinationEditText == null) {
+            throw new RuntimeException("ERROR: EditText no encontrados");
+        }
+
         // Configurar hint para mostrar la ubicación actual
         originEditText.setHint("📍 Ubicación actual (Av. Santa Fe 995)");
         
+        android.util.Log.d("MainActivity", "5. Inicializando botones...");
         routeButton = findViewById(R.id.route_button);
         vehicleRouteButton = findViewById(R.id.vehicle_route_button);
         routeInfoLayout = findViewById(R.id.route_info_layout);
@@ -284,7 +315,10 @@ public class MainActivity extends AppCompatActivity {
         exportUberButton.setOnClickListener(v -> exportToUber());
         exportPedidosYaButton.setOnClickListener(v -> exportToPedidosYa());
 
-        menuButton.setOnClickListener(v -> Toast.makeText(this, "Botón de Menú presionado", Toast.LENGTH_SHORT).show());
+        menuButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MenuActivity.class);
+            startActivity(intent);
+        });
         reportCrimeButton.setOnClickListener(v -> showReportCrimeDialog());
 
         backButton.setOnClickListener(v -> clearRoute());
@@ -295,14 +329,24 @@ public class MainActivity extends AppCompatActivity {
         streetCrimeFilterButton.setOnClickListener(v -> toggleStreetCrimeFilter());
         vehicleCrimeFilterButton.setOnClickListener(v -> toggleVehicleCrimeFilter());
 
+        android.util.Log.d("MainActivity", "6. Agregando marcador de usuario...");
         // Agregar marcador de ubicación actual del usuario
         addUserLocationMarker();
         
+        android.util.Log.d("MainActivity", "7. Configurando puntos seguros...");
         setupSafePoints();
+
+        android.util.Log.d("MainActivity", "7b. Agregando puntos seguros al mapa...");
         addSafePointsToMap();
-        setupCrimeAlerts();
-        addCrimeAlertsToMap();
-        
+
+        android.util.Log.d("MainActivity", "8. Programando carga de crímenes...");
+        // Cargar crímenes desde el backend CON DELAY para evitar problemas de timing
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            android.util.Log.d("MainActivity", "8b. Ejecutando carga de crímenes...");
+            loadCrimesFromBackend();
+        }, 1000); // Esperar 1 segundo después de que el mapa esté listo
+
+        android.util.Log.d("MainActivity", "9. Inicializando filtros...");
         // Inicializar filtros y botones
         showStreetCrime = true;
         showVehicleCrime = true;
@@ -326,37 +370,65 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        android.util.Log.d("MainActivity", "=== onCreate COMPLETADO EXITOSAMENTE ===");
+
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "=== ERROR CRÍTICO EN onCreate ===");
+            android.util.Log.e("MainActivity", "Mensaje: " + e.getMessage());
+            android.util.Log.e("MainActivity", "Tipo: " + e.getClass().getName());
+            e.printStackTrace();
+
+            String errorMsg = "Error al inicializar: " + e.getMessage();
+            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+
+            // Volver al login si hay error crítico
+            try {
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+            } catch (Exception e2) {
+                android.util.Log.e("MainActivity", "Error al volver a login: " + e2.getMessage());
+            }
+            finish();
+        }
     }
 
     private void addUserLocationMarker() {
-        // Crear marcador para la ubicación actual del usuario
-        userLocationMarker = new Marker(map);
-        userLocationMarker.setPosition(currentUserLocation);
-        userLocationMarker.setTitle("Tu ubicación");
-        userLocationMarker.setSnippet("Av. Santa Fe 995, Buenos Aires");
-        userLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
-        
-        // Usar el icono personalizado de ubicación
-        Drawable userLocationIcon = ContextCompat.getDrawable(this, R.drawable.ic_my_location);
-        userLocationMarker.setIcon(userLocationIcon);
-        
-        // Hacer que el marcador sea más visible
-        userLocationMarker.setAlpha(1.0f);
-        
-        // Agregar el marcador al mapa
-        map.getOverlays().add(userLocationMarker);
-        
-        // Animar el marcador (efecto de pulso)
-        startLocationMarkerAnimation();
+        try {
+            // Crear marcador para la ubicación actual del usuario
+            userLocationMarker = new Marker(map);
+            userLocationMarker.setPosition(currentUserLocation);
+            userLocationMarker.setTitle("Tu ubicación");
+            userLocationMarker.setSnippet("Av. Santa Fe 995, Buenos Aires");
+            userLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+
+            // Usar el icono personalizado de ubicación
+            Drawable userLocationIcon = ContextCompat.getDrawable(this, R.drawable.ic_my_location);
+            if (userLocationIcon != null) {
+                userLocationMarker.setIcon(userLocationIcon);
+            }
+
+            // Hacer que el marcador sea más visible
+            userLocationMarker.setAlpha(1.0f);
+
+            // Agregar el marcador al mapa
+            map.getOverlays().add(userLocationMarker);
+
+            // Animar el marcador (efecto de pulso)
+            startLocationMarkerAnimation();
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Error agregando marcador de usuario: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-    
+
     private void startLocationMarkerAnimation() {
         // Crear un efecto de pulso simple usando un Handler (luz que prende y apaga)
         final android.os.Handler handler = new android.os.Handler();
         final Runnable pulseRunnable = new Runnable() {
             boolean growing = true;
             float alpha = 1.0f;
-            
+
             @Override
             public void run() {
                 if (userLocationMarker != null) {
@@ -408,11 +480,11 @@ public class MainActivity extends AppCompatActivity {
                             fading = false;
                         }
                     }
-                    
+
                     // Aplicar la transparencia al marcador
                     marker.setAlpha(alpha);
                     map.invalidate();
-                    
+
                     // Continuar la animación (más lento para efecto fluido)
                     handler.postDelayed(this, 30); // ~33fps para efecto más suave
                 }
@@ -454,24 +526,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addSafePointsToMap() {
-        Drawable policeIcon = ContextCompat.getDrawable(this, R.drawable.ic_police_station);
-        Drawable hospitalIcon = ContextCompat.getDrawable(this, R.drawable.ic_hospital);
+        try {
+            Drawable policeIcon = ContextCompat.getDrawable(this, R.drawable.ic_police_station);
+            Drawable hospitalIcon = ContextCompat.getDrawable(this, R.drawable.ic_hospital);
 
-        for (SafePoint point : safePoints) {
-            Marker marker = new Marker(map);
-            marker.setPosition(point.location);
-            marker.setTitle(point.name);
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            for (SafePoint point : safePoints) {
+                try {
+                    Marker marker = new Marker(map);
+                    marker.setPosition(point.location);
+                    marker.setTitle(point.name);
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
 
-            if ("police".equals(point.type)) {
-                marker.setIcon(policeIcon);
-            } else {
-                marker.setIcon(hospitalIcon);
+                    if ("police".equals(point.type)) {
+                        if (policeIcon != null) {
+                            marker.setIcon(policeIcon);
+                        }
+                    } else {
+                        if (hospitalIcon != null) {
+                            marker.setIcon(hospitalIcon);
+                        }
+                    }
+                    map.getOverlays().add(marker);
+                    safePointMarkers.add(marker);
+                } catch (Exception e) {
+                    android.util.Log.e("MainActivity", "Error agregando punto seguro: " + point.name);
+                }
             }
-            map.getOverlays().add(marker);
-            safePointMarkers.add(marker);
+            map.invalidate();
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Error general en addSafePointsToMap: " + e.getMessage());
+            e.printStackTrace();
         }
-        map.invalidate();
     }
 
     private void clearRoute() {
@@ -537,7 +622,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!fastRoutes.isEmpty() && !safeRoutes.isEmpty()) {
                     RouteInfo fastRoute = fastRoutes.get(0);
                     RouteInfo safeRoute = safeRoutes.get(0);
-                    
+
                     System.out.println("=== DEBUG RUTAS ===");
                     System.out.println("Ruta rápida - Tiempo: " + fastRoute.timeInMillis/1000 + "s, Distancia: " + fastRoute.distanceInMeters + "m");
                     System.out.println("Ruta segura - Tiempo: " + safeRoute.timeInMillis/1000 + "s, Distancia: " + safeRoute.distanceInMeters + "m");
@@ -1574,6 +1659,121 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void loadCrimesFromBackend() {
+        // Cargar crímenes desde el backend
+        ApiClient.getService().getCrimenes().enqueue(new Callback<List<CrimeDto>>() {
+            @Override
+            public void onResponse(Call<List<CrimeDto>> call, Response<List<CrimeDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<CrimeDto> crimesFromBackend = response.body();
+
+                    // Limpiar alertas actuales
+                    crimeAlerts.clear();
+
+                    // Convertir CrimeDto a CrimeAlert
+                    for (CrimeDto crime : crimesFromBackend) {
+                        try {
+                            // Validar que los campos obligatorios no sean null
+                            if (crime.type == null || crime.type.trim().isEmpty()) {
+                                android.util.Log.w("MainActivity", "Crimen con type null o vacío, ignorando...");
+                                continue; // Saltar este crimen
+                            }
+
+                            if (crime.description == null) {
+                                crime.description = "Sin descripción";
+                            }
+
+                            if (crime.address == null) {
+                                crime.address = "Ubicación desconocida";
+                            }
+
+                            // Mapear tipos del backend a categorías de la app
+                            String category;
+                            String subType = crime.type;
+                            int severity;
+
+                            String typeLower = crime.type.toLowerCase();
+
+                            // Determinar categoría y gravedad basado en el tipo
+                            if (typeLower.contains("vehículo") ||
+                                typeLower.contains("vehiculo") ||
+                                typeLower.contains("auto") ||
+                                typeLower.contains("moto") ||
+                                typeLower.contains("bicicleta")) {
+                                category = "Delitos contra la propiedad";
+
+                                if (typeLower.contains("armado") || typeLower.contains("arma")) {
+                                    severity = 4;
+                                } else if (typeLower.contains("estacionado")) {
+                                    severity = 3;
+                                } else {
+                                    severity = 2;
+                                }
+                            } else {
+                                category = "Delitos contra las personas";
+
+                                if (typeLower.contains("homicidio")) {
+                                    severity = 4;
+                                } else if (typeLower.contains("agresión grave")) {
+                                    severity = 3;
+                                } else if (typeLower.contains("robo") || typeLower.contains("arrebato")) {
+                                    severity = 2;
+                                } else {
+                                    severity = 1;
+                                }
+                            }
+
+                            // Crear CrimeAlert desde CrimeDto
+                            CrimeAlert alert = new CrimeAlert(
+                                crime.type,
+                                crime.description,
+                                crime.address,
+                                crime.confirmed ? "Confirmado" : "Pendiente (" + crime.verifications + " verificaciones)",
+                                category.equals("Delitos contra la propiedad") ? "Robo de vehículos" : "Crimen en vía pública",
+                                category,
+                                subType,
+                                severity
+                            );
+
+                            // Establecer ubicación directamente desde el backend
+                            alert.location = new GeoPoint(crime.latitude, crime.longitude);
+
+                            crimeAlerts.add(alert);
+                        } catch (Exception e) {
+                            android.util.Log.e("MainActivity", "Error procesando crimen: " + e.getMessage());
+                            e.printStackTrace();
+                            // Continuar con el siguiente crimen
+                        }
+                    }
+
+                    // Agregar marcadores al mapa
+                    addCrimeAlertsToMap();
+
+                    Toast.makeText(MainActivity.this,
+                            "✅ " + crimeAlerts.size() + " incidentes cargados",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this,
+                            "⚠️ Error al cargar incidentes. Usando datos de ejemplo.",
+                            Toast.LENGTH_SHORT).show();
+                    // Fallback a datos hardcodeados si el backend falla
+                    setupCrimeAlerts();
+                    addCrimeAlertsToMap();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CrimeDto>> call, Throwable t) {
+                Toast.makeText(MainActivity.this,
+                        "⚠️ Sin conexión. Usando datos de ejemplo.",
+                        Toast.LENGTH_SHORT).show();
+                // Fallback a datos hardcodeados si hay error de conexión
+                setupCrimeAlerts();
+                addCrimeAlertsToMap();
+            }
+        });
+    }
+
     private void setupCrimeAlerts() {
         // ========== DELITOS CONTRA LAS PERSONAS ==========
         // Alertas de crímenes contra transeúntes en la vía pública
@@ -1716,72 +1916,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addCrimeAlertsToMap() {
-        // Geocodificar las direcciones de las alertas en un hilo separado
-        new Thread(() -> {
-            try {
-                for (CrimeAlert alert : crimeAlerts) {
-                    // Geocodificar la dirección usando la misma API que usamos para las rutas
-                    GeoPoint location = getGeoPointFromAddress(alert.address);
-                    if (location != null) {
-                        alert.location = location;
+        // Las ubicaciones ya vienen del backend, no necesitamos geocodificar
+        for (CrimeAlert alert : crimeAlerts) {
+            if (alert.location != null) { // Solo agregar si tiene ubicación
+                Marker marker = new Marker(map);
+                marker.setPosition(alert.location);
+                marker.setTitle(alert.title);
+                marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
+                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+                // Seleccionar ícono y color según la categoría del crimen
+                Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
+
+                if ("Delitos contra la propiedad".equals(alert.category)) {
+                    // Robos de vehículos - Color violeta
+                    if (alertIcon != null) {
+                        alertIcon.setTint(Color.parseColor("#9C27B0")); // Violeta
+                    }
+                } else {
+                    // Delitos contra las personas (transeúntes) - Color rojo
+                    if (alertIcon != null) {
+                        alertIcon.setTint(Color.parseColor("#F44336")); // Rojo
                     }
                 }
-                
-                // Una vez que tenemos todas las ubicaciones, agregar los marcadores en el hilo principal
-                runOnUiThread(() -> {
-                    for (CrimeAlert alert : crimeAlerts) {
-                        if (alert.location != null) { // Solo agregar si se pudo geocodificar
-                            Marker marker = new Marker(map);
-                            marker.setPosition(alert.location);
-                            marker.setTitle(alert.title);
-                            marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
-                            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                            
-                            // Seleccionar ícono y color según la categoría del crimen
-                            Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
-                            
-                            if ("Delitos contra la propiedad".equals(alert.category)) {
-                                // Robos de vehículos - Color violeta
-                                if (alertIcon != null) {
-                                    alertIcon.setTint(Color.parseColor("#9C27B0")); // Violeta
-                                }
-                            } else {
-                                // Delitos contra las personas (transeúntes) - Color rojo
-                                if (alertIcon != null) {
-                                    alertIcon.setTint(Color.parseColor("#F44336")); // Rojo
-                                }
-                            }
-                            marker.setIcon(alertIcon);
-                            
-                            // Configurar el click listener para mostrar el diálogo detallado
-                            marker.setOnMarkerClickListener((marker1, mapView) -> {
-                                showCrimeAlertDialog(alert);
-                                return true; // Consumir el evento
-                            });
+                marker.setIcon(alertIcon);
 
-                            map.getOverlays().add(marker);
-                            crimeAlertMarkers.add(marker);
-                            
-                            // Agregar animación de rebote al marcador
-                            startCrimeAlertAnimation(marker);
-                        }
-                    }
-                    map.invalidate();
-                    
-                    // Centrar el mapa en la zona de las alertas si se geocodificaron correctamente
-                    centerMapOnAlerts();
-                    
-                    // Crear zonas de calor DESPUÉS de geocodificar las alertas
-                    createDangerZones();
+                // Configurar el click listener para mostrar el diálogo detallado
+                marker.setOnMarkerClickListener((marker1, mapView) -> {
+                    showCrimeAlertDialog(alert);
+                    return true; // Consumir el evento
                 });
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> 
-                    Toast.makeText(MainActivity.this, "Error al geocodificar las alertas de seguridad", Toast.LENGTH_SHORT).show()
-                );
+
+                map.getOverlays().add(marker);
+                crimeAlertMarkers.add(marker);
+
+                // Agregar animación de rebote al marcador
+                startCrimeAlertAnimation(marker);
             }
-        }).start();
+        }
+        map.invalidate();
+
+        // Centrar el mapa en la zona de las alertas si hay alertas
+        if (!crimeAlerts.isEmpty()) {
+            centerMapOnAlerts();
+        }
+
+        // Crear zonas de calor DESPUÉS de agregar las alertas
+        createDangerZones();
     }
     
     private void centerMapOnAlerts() {
@@ -1821,14 +2002,14 @@ public class MainActivity extends AppCompatActivity {
             case 1: severityEmoji = "🟢"; break;
             default: severityEmoji = "⚪"; break;
         }
-        
+
         String message = "📂 Categoría: " + alert.category + "\n\n" +
                         "🏷️ Tipo: " + alert.subType + "\n\n" +
                         severityEmoji + " Gravedad: " + alert.getSeverityText() + " (" + alert.severity + "/4)\n\n" +
                         "📍 Ubicación: " + alert.address + "\n\n" +
                         "🕒 Cuándo: " + alert.timeAgo + "\n\n" +
                         "📝 Detalles: " + alert.description + "\n\n";
-        
+
         // Mensaje de precaución específico según la categoría y gravedad
         if ("Delitos contra la propiedad".equals(alert.category)) {
             message += "🚨 Recomendación: ";
@@ -1941,7 +2122,7 @@ public class MainActivity extends AppCompatActivity {
                 count++;
             }
         }
-        
+
         if (count > 0) {
             return new GeoPoint(totalLat / count, totalLon / count);
         }
@@ -1950,12 +2131,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void createDangerZone(GeoPoint center, int severity) {
         if (center == null) return;
-        
+
         // Determinar color, tamaño y transparencia basado en la gravedad del crimen (1-4)
         int color;
         double radiusInMeters;
         int alpha;
-        
+
         switch (severity) {
             case 1: // Leve
                 color = Color.parseColor("#FFD700"); // Amarillo dorado
@@ -2045,28 +2226,34 @@ public class MainActivity extends AppCompatActivity {
         TextView severityInfoText = dialogView.findViewById(R.id.severity_info_text);
         
         // Configurar categorías
-        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad"};
+        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad", "Otros"};
         android.widget.ArrayAdapter<String> categoryAdapter = new android.widget.ArrayAdapter<>(
             this, android.R.layout.simple_spinner_dropdown_item, categories);
         categorySpinner.setAdapter(categoryAdapter);
         
-        // Mapa de subtipos por categoría con sus gravedades
+        // Mapa de subtipos por categoría con sus gravedades (basado en la nueva API)
         Map<String, Map<String, Integer>> subtypesByCategoryWithSeverity = new HashMap<>();
         
         // Delitos contra las personas
         Map<String, Integer> personCrimes = new HashMap<>();
-        personCrimes.put("Homicidio", 4);
-        personCrimes.put("Agresión grave", 3);
-        personCrimes.put("Robo/Arrebato", 2);
-        personCrimes.put("Hurto", 1);
-        personCrimes.put("Agresión leve", 1);
+        personCrimes.put("HOMICIDIO_DOLOSO", 4);
+        personCrimes.put("HOMICIO_CULPOSO", 4);
+        personCrimes.put("LESIONES_GRAVES", 3);
+        personCrimes.put("LESIONES_LEVES", 2);
+        personCrimes.put("ROBO_CON_VIOLENCIA", 3);
+        personCrimes.put("ROBO_SIN_VIOLENCIA", 2);
         subtypesByCategoryWithSeverity.put("Delitos contra las personas", personCrimes);
         
         // Delitos contra la propiedad
         Map<String, Integer> propertyCrimes = new HashMap<>();
-        propertyCrimes.put("Robo armado", 4);
-        propertyCrimes.put("Robo vehículo estacionado", 3);
-        propertyCrimes.put("Robo pertenencias de vehículo", 2);
+        propertyCrimes.put("ROBO_VIA_PUBLICA", 2);
+        propertyCrimes.put("HURTO", 1);
+        subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
+
+        // Otros
+        Map<String, Integer> otherCrimes = new HashMap<>();
+        otherCrimes.put("DESORDENES_PUBLICOS", 1);
+        subtypesByCategoryWithSeverity.put("Otros", otherCrimes);
         subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
         
         // Configurar listener para cambio de categoría
@@ -2150,6 +2337,7 @@ public class MainActivity extends AppCompatActivity {
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(v -> {
             String address = addressInput.getText().toString().trim();
+            String description = incidentDescriptionInput.getText().toString().trim();
             String time = timeInput.getText().toString().trim();
             String category = (String) categorySpinner.getSelectedItem();
             String subtype = (String) subtypeSpinner.getSelectedItem();
@@ -2160,18 +2348,107 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             
+            if (description.isEmpty()) {
+                incidentDescriptionInput.setError("Por favor, describe el incidente");
+                return;
+            }
+
             if (time.isEmpty()) {
                 timeInput.setError("Por favor, indica cuándo ocurrió");
                 return;
             }
             
+            // Obtener email del usuario
+            String userEmail = UserSession.getCurrentUserMail();
+            if (userEmail == null) {
+                Toast.makeText(MainActivity.this, "Error: No hay usuario en sesión", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // Obtener gravedad del subtipo seleccionado
             Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(category);
             int severity = subtypes.get(subtype);
             
-            // Simular envío del reporte
-            dialog.dismiss();
-            showReportSuccessDialog(category, subtype, severity);
+            // Deshabilitar botón para evitar múltiples envíos
+            positiveButton.setEnabled(false);
+            positiveButton.setText("Enviando...");
+
+            // Geocodificar la dirección y enviar al backend
+            new Thread(() -> {
+                try {
+                    GeoPoint location = getGeoPointFromAddress(address);
+                    if (location == null) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(MainActivity.this,
+                                    "Error: No se pudo encontrar la dirección",
+                                    Toast.LENGTH_SHORT).show();
+                            positiveButton.setEnabled(true);
+                            positiveButton.setText("Enviar Reporte");
+                        });
+                        return;
+                    }
+
+                    // Crear request para el backend
+                    CrimeCreateRequest request = new CrimeCreateRequest(
+                            subtype,                    // type
+                            description + " (" + time + ")", // description incluye cuándo ocurrió
+                            address,                    // address
+                            location.getLatitude(),     // latitude
+                            location.getLongitude(),    // longitude
+                            userEmail                   // reporter
+                    );
+
+                    // Enviar al backend
+                    ApiClient.getService().crearCrimen(request).enqueue(new Callback<CrimeDto>() {
+                        @Override
+                        public void onResponse(Call<CrimeDto> call, Response<CrimeDto> response) {
+                            if (response.isSuccessful()) {
+                                android.util.Log.d("MainActivity", "✅ Reporte creado exitosamente");
+                                runOnUiThread(() -> {
+                                    dialog.dismiss();
+                                    showReportSuccessDialog(category, subtype, severity);
+                                    Toast.makeText(MainActivity.this,
+                                            "✅ Reporte enviado exitosamente",
+                                            Toast.LENGTH_SHORT).show();
+                                    android.util.Log.d("MainActivity", "🔄 Recargando crímenes...");
+                                    loadCrimesFromBackend();
+                                });
+                            } else {
+                                android.util.Log.e("MainActivity", "❌ Error al crear reporte: código " + response.code());
+                                runOnUiThread(() -> {
+                                    Toast.makeText(MainActivity.this,
+                                            "Error al enviar reporte (código: " + response.code() + ")",
+                                            Toast.LENGTH_SHORT).show();
+                                    positiveButton.setEnabled(true);
+                                    positiveButton.setText("Enviar Reporte");
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<CrimeDto> call, Throwable t) {
+                            android.util.Log.e("MainActivity", "❌ Error de conexión: " + t.getMessage());
+                            runOnUiThread(() -> {
+                                Toast.makeText(MainActivity.this,
+                                        "Error de conexión: " + t.getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                                positiveButton.setEnabled(true);
+                                positiveButton.setText("Enviar Reporte");
+                            });
+                        }
+                    });
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this,
+                                "Error al procesar la dirección",
+                                Toast.LENGTH_SHORT).show();
+                        positiveButton.setEnabled(true);
+                        positiveButton.setText("Enviar Reporte");
+                    });
+                }
+            }).start();
         });
     }
     
@@ -2212,8 +2489,16 @@ public class MainActivity extends AppCompatActivity {
                           "• Identificar zonas de riesgo\n" +
                           "• Alertar a otros usuarios\n" +
                           "• Mejorar las rutas seguras\n\n" +
-                          "🔒 Toda la información es tratada de forma confidencial.");
-        builder.setPositiveButton("Entendido", (dialog, which) -> dialog.dismiss());
+                          "🔒 Toda la información es tratada de forma confidencial.\n\n" +
+                          "💡 Tip: Puedes ver el estado de tus reportes en 'Mis Reportes'");
+
+        builder.setPositiveButton("Ver Mis Reportes", (dialog, which) -> {
+            Intent intent = new Intent(MainActivity.this, MyCrimesActivity.class);
+            startActivity(intent);
+            dialog.dismiss();
+        });
+
+        builder.setNegativeButton("Cerrar", (dialog, which) -> dialog.dismiss());
         builder.setIcon(R.drawable.ic_alert_warning);
         
         AlertDialog dialog = builder.create();
@@ -2256,7 +2541,7 @@ public class MainActivity extends AppCompatActivity {
             double checkLat = startLat + (endLat - startLat) * ratio;
             double checkLon = startLon + (endLon - startLon) * ratio;
             GeoPoint checkPoint = new GeoPoint(checkLat, checkLon);
-            
+
             for (CrimeAlert crime : streetCrimes) {
                 double distance = calculateDistance(checkPoint, crime.location);
                 if (distance < closestDistance && distance <= 300) { // Radio de 300m para peatones
@@ -2271,7 +2556,7 @@ public class MainActivity extends AppCompatActivity {
             // Crear un waypoint que desvíe la ruta
             double avoidanceLat = closestCrime.location.getLatitude() + 0.002; // ~200m de desvío
             double avoidanceLon = closestCrime.location.getLongitude() + 0.002;
-            
+
             // Verificar que el punto de evasión no esté cerca de otros peligros
             GeoPoint avoidancePoint = new GeoPoint(avoidanceLat, avoidanceLon);
             if (!isPointNearDanger(avoidancePoint)) {
@@ -2289,15 +2574,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    
+
     // ★★★ MÉTODO ESPECÍFICO PARA WAYPOINTS DE VEHÍCULOS ★★★
-    
+
     private void addVehicleSpecificWaypoints(GeoPoint start, GeoPoint end, List<GeoPoint> waypoints) {
         // Limitar a máximo 1 waypoint adicional para vehículos
         if (waypoints.size() >= 2) {
             return; // Ya hay suficientes waypoints
         }
-        
+
         // Buscar robos de vehículos específicamente
         List<CrimeAlert> vehicleThefts = new ArrayList<>();
         for (CrimeAlert crime : crimeAlerts) {
@@ -2305,25 +2590,25 @@ public class MainActivity extends AppCompatActivity {
                 vehicleThefts.add(crime);
             }
         }
-        
+
         if (vehicleThefts.isEmpty()) {
             return; // No hay robos de vehículos que evitar
         }
-        
+
         // Buscar solo el robo de vehículo más cercano a la ruta directa
         double startLat = start.getLatitude();
         double startLon = start.getLongitude();
         double endLat = end.getLatitude();
         double endLon = end.getLongitude();
-        
+
         CrimeAlert closestTheft = null;
         double closestDistance = Double.MAX_VALUE;
-        
+
         // Encontrar el robo más cercano al punto medio de la ruta
         double midLat = startLat + 0.5 * (endLat - startLat);
         double midLon = startLon + 0.5 * (endLon - startLon);
         GeoPoint midPoint = new GeoPoint(midLat, midLon);
-        
+
         for (CrimeAlert theft : vehicleThefts) {
             double distance = calculateDistance(midPoint, theft.location);
             if (distance < closestDistance && distance <= 500) { // Solo si está dentro de 500m
@@ -2331,13 +2616,13 @@ public class MainActivity extends AppCompatActivity {
                 closestTheft = theft;
             }
         }
-        
+
         // Si encontramos un robo cercano, crear un waypoint de evasión
         if (closestTheft != null) {
             // Crear un waypoint que desvíe la ruta de manera más conservadora
             double avoidanceLat = closestTheft.location.getLatitude() + 0.003; // ~300m de desvío
             double avoidanceLon = closestTheft.location.getLongitude() + 0.003;
-            
+
             // Verificar que el punto de evasión no esté cerca de otros peligros
             GeoPoint avoidancePoint = new GeoPoint(avoidanceLat, avoidanceLon);
             if (!isPointNearDanger(avoidancePoint)) {
@@ -2346,18 +2631,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    
+
     // ★★★ MÉTODOS PARA FILTROS DE CRIMEN ★★★
-    
+
     private void toggleStreetCrimeFilter() {
         showStreetCrime = !showStreetCrime;
         updateCrimeFilterButtons();
         refreshCrimeDisplay();
-        
+
         String status = showStreetCrime ? "mostrar" : "ocultar";
         Toast.makeText(this, "Filtro: " + status + " crímenes en vía pública", Toast.LENGTH_SHORT).show();
     }
-    
+
     private void toggleVehicleCrimeFilter() {
         showVehicleCrime = !showVehicleCrime;
         updateCrimeFilterButtons();
@@ -2444,17 +2729,6 @@ public class MainActivity extends AppCompatActivity {
                 // Usar la nueva función que considera la gravedad
                 createDangerZone(alert.location, alert.severity);
             }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Si hay una ruta activa (panel de información visible), limpiar la ruta
-        if (routeInfoLayout.getVisibility() == View.VISIBLE) {
-            clearRoute();
-        } else {
-            // Si no hay ruta activa, comportamiento normal (cerrar app)
-            super.onBackPressed();
         }
     }
 
