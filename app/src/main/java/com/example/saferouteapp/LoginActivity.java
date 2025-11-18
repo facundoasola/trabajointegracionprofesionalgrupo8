@@ -34,7 +34,6 @@ public class LoginActivity extends AppCompatActivity {
         // Botón LOGIN
         loginButton.setOnClickListener(v -> attemptLogin());
 
-        // Link REGISTRARSE
         registerTextView.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);

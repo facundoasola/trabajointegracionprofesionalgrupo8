@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="#2196F3"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="☰ Menú"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/user_name_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="👤 Usuario"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/user_points_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🏆 0 puntos"
+            android:textSize="16sp"
+            android:textColor="#E3F2FD"/>
+
+    </LinearLayout>
+
+    <!-- Menu Options -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Button
+                android:id="@+id/view_points_button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="🏆 Ver Mis Puntos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"/>
+
+            <Button
+                android:id="@+id/pending_reports_button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="📋 Reportes Pendientes"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#FF9800"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"/>
+
+            <Button
+                android:id="@+id/my_crimes_button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="🚨 Mis Reportes"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#2196F3"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"/>
+
+            <Button
+                android:id="@+id/logout_button"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="🚪 Cerrar Sesión"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="12dp"
+                android:gravity="start|center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Close Button -->
+    <Button
+        android:id="@+id/close_button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="✕ Cerrar"
+        android:textSize="16sp"
+        android:backgroundTint="#757575"
+        android:textColor="#FFFFFF"
+        android:layout_margin="16dp"/>
+
+</LinearLayout>
+

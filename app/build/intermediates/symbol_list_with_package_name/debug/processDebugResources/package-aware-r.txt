@@ -3130,6 +3130,7 @@ id actions
 id activity_chooser_view_content
 id add
 id address_input
+id address_text_view
 id alertTitle
 id aligned
 id all
@@ -3185,6 +3186,7 @@ id clear_text
 id clip_horizontal
 id clip_vertical
 id clockwise
+id close_button
 id closest
 id collapseActionView
 id compress
@@ -3211,6 +3213,7 @@ id decor_content_parent
 id default_activity_button
 id deltaRelative
 id dependency_ordering
+id description_text_view
 id design_bottom_sheet
 id design_menu_item_action_area
 id design_menu_item_action_area_stub
@@ -3234,6 +3237,7 @@ id dragRight
 id dragStart
 id dragUp
 id dropdown_menu
+id earned_points_text_view
 id easeIn
 id easeInOut
 id easeOut
@@ -3243,6 +3247,7 @@ id edit_query
 id elastic
 id email_edit_text
 id embed
+id empty_text_view
 id end
 id endToStart
 id enterAlways
@@ -3318,6 +3323,7 @@ id listMode
 id list_item
 id login_button
 id login_text_view
+id logout_button
 id m3_side_sheet
 id main
 id map
@@ -3381,6 +3387,8 @@ id mtrl_picker_text_input_range_start
 id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
+id my_crimes_button
+id my_crimes_recycler_view
 id name_edit_text
 id navigation_bar_item_active_indicator_view
 id navigation_bar_item_icon_container
@@ -3418,8 +3426,11 @@ id password_toggle
 id path
 id pathRelative
 id peekHeight
+id pending_reports_button
+id pending_reports_recycler_view
 id percent
 id pin
+id points_text_view
 id position
 id postLayout
 id pressed
@@ -3428,10 +3439,12 @@ id progress_horizontal
 id radio
 id ratio
 id rectangles
+id refresh_button
 id register_button
 id register_text_view
 id report_crime_button
 id report_drawn
+id reporter_text_view
 id reverseSawtooth
 id right
 id rightToLeft
@@ -3516,6 +3529,7 @@ id startToEnd
 id startVertical
 id staticLayout
 id staticPostLayout
+id status_text_view
 id stop
 id street_crime_filter_button
 id stretch
@@ -3523,6 +3537,7 @@ id submenuarrow
 id submit_area
 id subtype_spinner
 id supportScrollUp
+id surname_edit_text
 id tabMode
 id tag_accessibility_actions
 id tag_accessibility_clickable_spans
@@ -3558,6 +3573,7 @@ id time_input
 id title
 id titleDividerNoCustom
 id title_template
+id title_text_view
 id toggle
 id top
 id topPanel
@@ -3575,10 +3591,16 @@ id uniform
 id unlabeled
 id up
 id useLogo
+id user_email_text_view
+id user_name_text_view
+id user_points_text_view
 id vehicle_crime_filter_button
 id vehicle_route_button
+id verifications_text_view
+id verify_button
 id vertical_only
 id view_offset_helper
+id view_points_button
 id view_transition
 id view_tree_lifecycle_owner
 id view_tree_on_back_pressed_dispatcher_owner
@@ -3712,6 +3734,10 @@ layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_login
 layout activity_main
+layout activity_menu
+layout activity_my_crimes
+layout activity_pending_reports
+layout activity_points
 layout activity_register
 layout bonuspack_bubble
 layout custom_dialog
@@ -3731,6 +3757,8 @@ layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_report_crime
+layout item_my_crime
+layout item_pending_report
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title

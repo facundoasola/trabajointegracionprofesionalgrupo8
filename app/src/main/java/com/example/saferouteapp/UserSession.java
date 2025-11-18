@@ -20,6 +20,12 @@ public class UserSession {
         return currentUser != null ? currentUser.points : 0;
     }
 
+    public static void updatePoints(int newPoints) {
+        if (currentUser != null) {
+            currentUser.points = newPoints;
+        }
+    }
+
     public static void clear() {
         currentUser = null;
     }

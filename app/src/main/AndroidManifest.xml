@@ -43,6 +43,30 @@
             android:name=".MainActivity"
             android:exported="false" />
 
+        <!-- Menu Activity - Menú principal -->
+        <activity
+            android:name=".MenuActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- Points Activity - Ver puntos del usuario -->
+        <activity
+            android:name=".PointsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- Pending Reports Activity - Verificar reportes -->
+        <activity
+            android:name=".PendingReportsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- My Crimes Activity - Mis reportes -->
+        <activity
+            android:name=".MyCrimesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
     </application>
 
 </manifest>
