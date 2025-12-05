@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,12 +21,13 @@ public class BackendWakeUpHelper {
 
     public static void wakeUpBackend(Context context, WakeUpCallback callback) {
         Log.d(TAG, "🌅 Intentando despertar el backend...");
+        HashMap<String, String > request = new HashMap<>();
 
         Toast.makeText(context, "⏳ Despertando servidor, esto puede tardar hasta 1 minuto...",
                 Toast.LENGTH_LONG).show();
 
         // Hacer una llamada simple para despertar el backend
-        ApiClient.getService().getCrimenes().enqueue(new Callback<java.util.List<CrimeDto>>() {
+        ApiClient.getService().getCrimenes(request).enqueue(new Callback<java.util.List<CrimeDto>>() {
             @Override
             public void onResponse(Call<java.util.List<CrimeDto>> call, Response<java.util.List<CrimeDto>> response) {
                 if (response.isSuccessful()) {

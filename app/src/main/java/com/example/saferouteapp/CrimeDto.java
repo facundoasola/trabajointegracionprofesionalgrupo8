@@ -2,30 +2,38 @@ package com.example.saferouteapp;
 
 public class CrimeDto {
     public long id;
-    public String type;
+    public Category category;
+
     public String description;
     public String address;
-    public double latitude;
-    public double longitude;
+    public String latitude;
+    public String longitude;
     public String reporter;   // mail del usuario
-    public int verifications = 0; // cantidad de verificaciones
+    public int verification = 0; // cantidad de verificaciones
     public boolean confirmed = false; // si está confirmado
+
+    public String status;
+
+    public String time;
 
     // Constructor vacío para Retrofit
     public CrimeDto() {}
 
     // Constructor completo
-    public CrimeDto(long id, String type, String description, String address,
-                    double latitude, double longitude, String reporter,
-                    int verifications, boolean confirmed) {
+    public CrimeDto(long id, Category category, String description, String address,
+                    String latitude, String longitude, String reporter,
+                    int verification, boolean confirmed, String time,String status) {
         this.id = id;
-        this.type = type;
+        this.category = category;
         this.description = description;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.reporter = reporter;
-        this.verifications = verifications;
+        this.verification = verification;
         this.confirmed = confirmed;
+        this.time = time;
+        this.status = status;
+
     }
 }

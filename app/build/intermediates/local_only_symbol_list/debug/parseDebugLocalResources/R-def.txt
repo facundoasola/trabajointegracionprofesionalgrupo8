@@ -20,6 +20,7 @@ drawable ic_alert_warning
 drawable ic_arrow_back_24
 drawable ic_destination_marker
 drawable ic_hospital
+drawable ic_inactive_crime
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 drawable ic_menu_24
@@ -38,10 +39,14 @@ drawable splash_screen
 id address_input
 id address_text_view
 id back_button
+id burger_king_card
+id burger_king_image
+id burger_king_redeem
 id category_spinner
 id close_button
 id confirm_button
 id confirm_password_edit_text
+id confirmaciones_text_view
 id description_text_view
 id destination_text
 id earned_points_text_view
@@ -59,6 +64,7 @@ id incident_description_input
 id login_button
 id login_text_view
 id logout_button
+id logros_text_view
 id main
 id map
 id menu_button
@@ -75,6 +81,8 @@ id register_button
 id register_text_view
 id report_crime_button
 id reporter_text_view
+id rewards_back_button
+id rewards_points_text
 id route_button
 id route_info_layout
 id safe_route_info
@@ -93,9 +101,16 @@ id user_name_text_view
 id user_points_text_view
 id vehicle_crime_filter_button
 id vehicle_route_button
+id verificaciones_text_view
 id verifications_text_view
 id verify_button
 id view_points_button
+id ypf_card
+id ypf_image
+id ypf_redeem
+id zara_card
+id zara_image
+id zara_redeem
 id zoom_in_button
 id zoom_out_button
 layout activity_login
@@ -105,6 +120,7 @@ layout activity_my_crimes
 layout activity_pending_reports
 layout activity_points
 layout activity_register
+layout activity_rewards
 layout dialog_report_crime
 layout item_my_crime
 layout item_pending_report

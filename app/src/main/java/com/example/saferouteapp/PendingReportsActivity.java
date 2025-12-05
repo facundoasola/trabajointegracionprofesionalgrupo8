@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -48,7 +49,8 @@ public class PendingReportsActivity extends AppCompatActivity {
     }
 
     private void loadPendingReports() {
-        ApiClient.getService().getCrimenes().enqueue(new Callback<List<CrimeDto>>() {
+        HashMap<String, String > request = new HashMap<>();
+        ApiClient.getService().getCrimenes(request).enqueue(new Callback<List<CrimeDto>>() {
             @Override
             public void onResponse(Call<List<CrimeDto>> call, Response<List<CrimeDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -106,10 +108,10 @@ public class PendingReportsActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             CrimeDto report = reports.get(position);
 
-            holder.titleTextView.setText("🚨 " + report.type);
+            holder.titleTextView.setText("🚨 " + report.category.getCode());
             holder.addressTextView.setText("📍 " + report.address);
             holder.descriptionTextView.setText(report.description);
-            holder.verificationsTextView.setText("✓ Verificaciones: " + report.verifications);
+            holder.verificationsTextView.setText("✓ Verificaciones: " + report.verification);
             holder.reporterTextView.setText("👤 Reportado por: " + report.reporter);
 
             // Restaurar ambos botones: verificar y confirmar
@@ -144,7 +146,7 @@ public class PendingReportsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("✓ Verificar Reporte")
                 .setMessage("¿Confirmas que este reporte es válido?\n\n" +
-                        "Tipo: " + report.type + "\n" +
+                        "Tipo: " + report.category + "\n" +
                         "Ubicación: " + report.address + "\n\n" +
                         "Tu verificación ayudará a validar este incidente y podrías ganar logros.")
                 .setPositiveButton("Sí, verificar", (dialog, which) -> verifyReport(report))
@@ -156,9 +158,9 @@ public class PendingReportsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("🎯 Confirmar Reporte")
                 .setMessage("⚠️ ATENCIÓN: Esta acción confirmará oficialmente el reporte.\n\n" +
-                        "Tipo: " + report.type + "\n" +
+                        "Tipo: " + report.category + "\n" +
                         "Ubicación: " + report.address + "\n" +
-                        "Verificaciones actuales: " + report.verifications + "\n\n" +
+                        "Verificaciones actuales: " + report.verification + "\n\n" +
                         "Los logros se actualizan automáticamente.\n\n" +
                         "¿Estás seguro?")
                 .setPositiveButton("Sí, confirmar", (dialog, which) -> confirmReport(report))

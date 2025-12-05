@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -49,6 +50,7 @@ public class MyCrimesActivity extends AppCompatActivity {
     }
 
     private void loadMyCrimes() {
+        HashMap<String, String > request = new HashMap<>();
         String userEmail = UserSession.getCurrentUserMail();
         if (userEmail == null) {
             Toast.makeText(this, "Error: No hay usuario en sesión", Toast.LENGTH_SHORT).show();
@@ -56,7 +58,7 @@ public class MyCrimesActivity extends AppCompatActivity {
             return;
         }
 
-        ApiClient.getService().getCrimenes().enqueue(new Callback<List<CrimeDto>>() {
+        ApiClient.getService().getCrimenes(request).enqueue(new Callback<List<CrimeDto>>() {
             @Override
             public void onResponse(Call<List<CrimeDto>> call, Response<List<CrimeDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -149,17 +151,23 @@ public class MyCrimesActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             CrimeDto crime = crimes.get(position);
 
-            holder.titleTextView.setText("🚨 " + crime.type);
+            holder.titleTextView.setText("🚨 " + crime.category.getCode());
             holder.addressTextView.setText("📍 " + crime.address);
             holder.descriptionTextView.setText(crime.description);
-            holder.verificationsTextView.setText("✓ Verificaciones: " + crime.verifications);
+            holder.verificationsTextView.setText("✓ Verificaciones: " + crime.verification);
 
-            if (crime.confirmed) {
+            if (crime.status.equals("CONFIRMADO")){
                 holder.statusTextView.setText("✅ CONFIRMADO");
                 holder.statusTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
                 holder.earnedPointsTextView.setVisibility(View.VISIBLE);
                 holder.earnedPointsTextView.setText("🏆 +10 puntos ganados");
-            } else {
+            } else if(crime.status.equals("VERIFICADO_COMUNIDAD")){
+                holder.statusTextView.setText("✅ VERIFICADO POR COMUNIDAD");
+                holder.statusTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                holder.earnedPointsTextView.setVisibility(View.VISIBLE);
+                holder.earnedPointsTextView.setText("🏆 +10 puntos ganados");
+            }
+            else {
                 holder.statusTextView.setText("⏳ PENDIENTE");
                 holder.statusTextView.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
                 holder.earnedPointsTextView.setVisibility(View.GONE);

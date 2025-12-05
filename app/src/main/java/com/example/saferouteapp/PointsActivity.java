@@ -7,13 +7,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.stream.Collectors;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PointsActivity extends AppCompatActivity {
 
-    private TextView pointsTextView, userNameTextView, userEmailTextView;
+    private TextView pointsTextView, userNameTextView, userEmailTextView, logrostextView,verificacionestextView, confirmacionestextView;
     private Button refreshButton, backButton;
 
     @Override
@@ -27,6 +29,11 @@ public class PointsActivity extends AppCompatActivity {
         userEmailTextView = findViewById(R.id.user_email_text_view);
         refreshButton = findViewById(R.id.refresh_button);
         backButton = findViewById(R.id.back_button);
+        logrostextView = findViewById(R.id.logros_text_view);
+        verificacionestextView = findViewById(R.id.verificaciones_text_view);
+        confirmacionestextView = findViewById(R.id.confirmaciones_text_view);
+
+
 
         // Mostrar datos del usuario actual
         displayUserInfo();
@@ -44,6 +51,12 @@ public class PointsActivity extends AppCompatActivity {
             userNameTextView.setText("👤 " + user.name + " " + user.surname);
             userEmailTextView.setText("📧 " + user.mail);
             pointsTextView.setText(String.valueOf(user.points));
+            logrostextView.setText(user.achievements.stream().map(Logro::getName).collect(Collectors.joining(", ")));
+            verificacionestextView.setText(String.valueOf(user.validations));
+            confirmacionestextView.setText(String.valueOf(user.confirmedReports));
+
+
+
         } else {
             Toast.makeText(this, "No hay usuario en sesión", Toast.LENGTH_SHORT).show();
             finish();

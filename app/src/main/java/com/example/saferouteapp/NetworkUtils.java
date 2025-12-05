@@ -6,6 +6,8 @@ import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -24,6 +26,7 @@ public class NetworkUtils {
     }
 
     public static void testBackendConnection(Context context) {
+        HashMap<String, String > request = new HashMap<>();
         Log.d("NetworkUtils", "🔍 Probando conexión al backend...");
 
         if (!isNetworkAvailable(context)) {
@@ -32,7 +35,7 @@ public class NetworkUtils {
         }
 
         // Hacer una simple llamada GET al endpoint de crímenes para probar
-        ApiClient.getService().getCrimenes().enqueue(new Callback<java.util.List<CrimeDto>>() {
+        ApiClient.getService().getCrimenes(request).enqueue(new Callback<java.util.List<CrimeDto>>() {
             @Override
             public void onResponse(Call<java.util.List<CrimeDto>> call, Response<java.util.List<CrimeDto>> response) {
                 if (response.isSuccessful()) {

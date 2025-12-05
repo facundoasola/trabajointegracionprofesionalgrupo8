@@ -1660,8 +1660,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadCrimesFromBackend() {
+        HashMap<String, String > request = new HashMap<>();
         // Cargar crímenes desde el backend
-        ApiClient.getService().getCrimenes().enqueue(new Callback<List<CrimeDto>>() {
+        ApiClient.getService().getCrimenes(request).enqueue(new Callback<List<CrimeDto>>() {
             @Override
             public void onResponse(Call<List<CrimeDto>> call, Response<List<CrimeDto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -1674,7 +1675,7 @@ public class MainActivity extends AppCompatActivity {
                     for (CrimeDto crime : crimesFromBackend) {
                         try {
                             // Validar que los campos obligatorios no sean null
-                            if (crime.type == null || crime.type.trim().isEmpty()) {
+                            if (crime.category == null ) {
                                 android.util.Log.w("MainActivity", "Crimen con type null o vacío, ignorando...");
                                 continue; // Saltar este crimen
                             }
@@ -1689,10 +1690,10 @@ public class MainActivity extends AppCompatActivity {
 
                             // Mapear tipos del backend a categorías de la app
                             String category;
-                            String subType = crime.type;
+                            String subType = crime.category.getCode();
                             int severity;
 
-                            String typeLower = crime.type.toLowerCase();
+                            String typeLower = crime.category.getCode().toLowerCase();
 
                             // Determinar categoría y gravedad basado en el tipo
                             if (typeLower.contains("vehículo") ||
@@ -1725,10 +1726,10 @@ public class MainActivity extends AppCompatActivity {
 
                             // Crear CrimeAlert desde CrimeDto
                             CrimeAlert alert = new CrimeAlert(
-                                crime.type,
+                                crime.category.getCode(),
                                 crime.description,
                                 crime.address,
-                                crime.confirmed ? "Confirmado" : "Pendiente (" + crime.verifications + " verificaciones)",
+                                crime.confirmed ? "Confirmado" : "Pendiente (" + crime.verification + " verificaciones)",
                                 category.equals("Delitos contra la propiedad") ? "Robo de vehículos" : "Crimen en vía pública",
                                 category,
                                 subType,
@@ -1736,7 +1737,7 @@ public class MainActivity extends AppCompatActivity {
                             );
 
                             // Establecer ubicación directamente desde el backend
-                            alert.location = new GeoPoint(crime.latitude, crime.longitude);
+                            alert.location = new GeoPoint(Double.parseDouble(crime.latitude), Double.parseDouble( crime.longitude));
 
                             crimeAlerts.add(alert);
                         } catch (Exception e) {
@@ -2391,11 +2392,12 @@ public class MainActivity extends AppCompatActivity {
                     // Crear request para el backend
                     CrimeCreateRequest request = new CrimeCreateRequest(
                             subtype,                    // type
-                            description + " (" + time + ")", // description incluye cuándo ocurrió
+                            description, // description incluye cuándo ocurrió
                             address,                    // address
-                            location.getLatitude(),     // latitude
-                            location.getLongitude(),    // longitude
-                            userEmail                   // reporter
+                            String.valueOf(location.getLatitude()),     // latitude
+                            String.valueOf(location.getLongitude()),    // longitude
+                            userEmail        ,           // reporter
+                            time
                     );
 
                     // Enviar al backend

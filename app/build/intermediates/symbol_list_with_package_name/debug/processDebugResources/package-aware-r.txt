@@ -2938,6 +2938,7 @@ drawable ic_clear_black_24
 drawable ic_clock_black_24dp
 drawable ic_destination_marker
 drawable ic_hospital
+drawable ic_inactive_crime
 drawable ic_keyboard_black_24dp
 drawable ic_launcher_background
 drawable ic_launcher_foreground
@@ -3164,6 +3165,9 @@ id bubble_image
 id bubble_moreinfo
 id bubble_subdescription
 id bubble_title
+id burger_king_card
+id burger_king_image
+id burger_king_redeem
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3192,6 +3196,7 @@ id collapseActionView
 id compress
 id confirm_button
 id confirm_password_edit_text
+id confirmaciones_text_view
 id constraint
 id container
 id content
@@ -3324,6 +3329,7 @@ id list_item
 id login_button
 id login_text_view
 id logout_button
+id logros_text_view
 id m3_side_sheet
 id main
 id map
@@ -3446,6 +3452,8 @@ id report_crime_button
 id report_drawn
 id reporter_text_view
 id reverseSawtooth
+id rewards_back_button
+id rewards_points_text
 id right
 id rightToLeft
 id right_icon
@@ -3596,6 +3604,7 @@ id user_name_text_view
 id user_points_text_view
 id vehicle_crime_filter_button
 id vehicle_route_button
+id verificaciones_text_view
 id verifications_text_view
 id verify_button
 id vertical_only
@@ -3617,6 +3626,12 @@ id wrap_content
 id wrap_content_constrained
 id x_left
 id x_right
+id ypf_card
+id ypf_image
+id ypf_redeem
+id zara_card
+id zara_image
+id zara_redeem
 id zoom_in_button
 id zoom_out_button
 integer abc_config_activityDefaultDur
@@ -3739,6 +3754,7 @@ layout activity_my_crimes
 layout activity_pending_reports
 layout activity_points
 layout activity_register
+layout activity_rewards
 layout bonuspack_bubble
 layout custom_dialog
 layout design_bottom_navigation_item

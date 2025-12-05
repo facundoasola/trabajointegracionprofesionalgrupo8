@@ -1,5 +1,6 @@
 package com.example.saferouteapp;
 
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -18,8 +19,9 @@ public interface ApiService {
     @POST("api/usuarios")
     Call<UserResponse> getUsuario(@Body UserMailRequest request);
 
-    @GET("api/crimenes")
-    Call<List<CrimeDto>> getCrimenes();
+    @POST("api/crimenes")
+    Call<List<CrimeDto>> getCrimenes(@Body HashMap<String, String> request);
+
 
     @POST("api/crimen-nuevo")
     Call<CrimeDto> crearCrimen(@Body CrimeCreateRequest request);
@@ -29,4 +31,6 @@ public interface ApiService {
 
     @POST("api/confirmacion-crimen")
     Call<Void> confirmarCrimen(@Body CrimeIdRequest request);
+
+
 }
