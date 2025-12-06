@@ -4,7 +4,7 @@
             "outputFile": "com.example.saferouteapp-mergeDebugResources-34:/values-large-v4/values-large-v4.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Santiago\\.gradle\\caches\\9.0-milestone-1\\transforms\\7321630b8d55c0c2f4c422cfcd54bb4a\\transformed\\appcompat-1.6.1\\res\\values-large-v4\\values-large-v4.xml",
+                    "source": "/Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/7321630b8d55c0c2f4c422cfcd54bb4a/transformed/appcompat-1.6.1/res/values-large-v4/values-large-v4.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10",
                         "startColumns": "4,4,4,4,4,4,4,4,4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Santiago\\.gradle\\caches\\9.0-milestone-1\\transforms\\217e011d2470175b7bb5701e8ebb040d\\transformed\\material-1.9.0\\res\\values-large-v4\\values-large-v4.xml",
+                    "source": "/Users/lucasgima/.gradle/caches/9.0-milestone-1/transforms/217e011d2470175b7bb5701e8ebb040d/transformed/material-1.9.0/res/values-large-v4/values-large-v4.xml",
                     "from": {
                         "startLines": "2,3,4,10",
                         "startColumns": "4,4,4,4",

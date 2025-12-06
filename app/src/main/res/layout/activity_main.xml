@@ -72,6 +72,18 @@
             app:tint="@android:color/white"
             android:layout_marginBottom="8dp" />
 
+        <!-- Botón para volver a Mi Ubicación -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/my_location_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_gps_button"
+            app:backgroundTint="#2196F3"
+            app:fabSize="mini"
+            app:tint="@android:color/white"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="Mi Ubicación" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/zoom_in_button"
             android:layout_width="wrap_content"
@@ -249,6 +261,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/safe_route_radio"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/radiobutton_on_background"

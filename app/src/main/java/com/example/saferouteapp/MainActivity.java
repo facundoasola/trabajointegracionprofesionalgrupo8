@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton backButton;
     private Marker originMarker, destinationMarker;
     private FloatingActionButton menuButton, zoomInButton, zoomOutButton,
-            streetCrimeFilterButton, vehicleCrimeFilterButton;
+            streetCrimeFilterButton, vehicleCrimeFilterButton, myLocationButton;
     private Button reportCrimeButton;
 
     private final String MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoibHVjYXNhZzA1IiwiYSI6ImNtZ3poaTdxMDAwOGcyaXBxYWRvYzJkanIifQ.2tJ3eYfxB8W5NbeQTKNHwA";
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout safeRouteOption, fastRouteOption;
     private LinearLayout exportButtonsLayout;
     private TextView safeRouteInfo, fastRouteInfo;
-    private ImageView fastRouteRadio;
+    private ImageView safeRouteRadio, fastRouteRadio;
     private Button exportUberButton, exportPedidosYaButton;
 
     private final List<Polyline> routeOverlays = new ArrayList<>();
@@ -256,12 +256,14 @@ public class MainActivity extends AppCompatActivity {
         fastRouteOption = findViewById(R.id.fast_route_option);
         safeRouteInfo = findViewById(R.id.safe_route_info);
         fastRouteInfo = findViewById(R.id.fast_route_info);
+        safeRouteRadio = findViewById(R.id.safe_route_radio);
         fastRouteRadio = findViewById(R.id.fast_route_radio);
         menuButton = findViewById(R.id.menu_button);
         reportCrimeButton = findViewById(R.id.report_crime_button);
         backButton = findViewById(R.id.back_button);
         zoomInButton = findViewById(R.id.zoom_in_button);
         zoomOutButton = findViewById(R.id.zoom_out_button);
+        myLocationButton = findViewById(R.id.my_location_button);
         streetCrimeFilterButton = findViewById(R.id.street_crime_filter_button);
         vehicleCrimeFilterButton = findViewById(R.id.vehicle_crime_filter_button);
         
@@ -275,36 +277,40 @@ public class MainActivity extends AppCompatActivity {
             String originAddress = originEditText.getText().toString().trim();
             String destinationAddress = destinationEditText.getText().toString().trim();
 
-            // Si el origen está vacío, usar la ubicación actual
-            if (originAddress.isEmpty()) {
-                originAddress = "Av. Santa Fe 995, Buenos Aires, Argentina";
-            }
-            
             if (destinationAddress.isEmpty()) {
                 Toast.makeText(this, "Por favor, ingresa un destino", Toast.LENGTH_SHORT).show();
                 return;
             }
+
             vehicleMode = false;
             hideKeyboard();
-            calculateBothRoutes(originAddress, destinationAddress);
+
+            // Si el origen está vacío, usar directamente la ubicación actual (GeoPoint)
+            if (originAddress.isEmpty()) {
+                calculateBothRoutesFromCurrentLocation(destinationAddress);
+            } else {
+                calculateBothRoutes(originAddress, destinationAddress);
+            }
         });
         
         vehicleRouteButton.setOnClickListener(v -> {
             String originAddress = originEditText.getText().toString().trim();
             String destinationAddress = destinationEditText.getText().toString().trim();
 
-            // Si el origen está vacío, usar la ubicación actual
-            if (originAddress.isEmpty()) {
-                originAddress = "Av. Santa Fe 995, Buenos Aires, Argentina";
-            }
-            
             if (destinationAddress.isEmpty()) {
                 Toast.makeText(this, "Por favor, ingresa un destino", Toast.LENGTH_SHORT).show();
                 return;
             }
+
             vehicleMode = true;
             hideKeyboard();
-            calculateBothRoutes(originAddress, destinationAddress);
+
+            // Si el origen está vacío, usar directamente la ubicación actual (GeoPoint)
+            if (originAddress.isEmpty()) {
+                calculateBothRoutesFromCurrentLocation(destinationAddress);
+            } else {
+                calculateBothRoutes(originAddress, destinationAddress);
+            }
         });
 
         // Configurar listeners para las opciones de ruta
@@ -326,6 +332,13 @@ public class MainActivity extends AppCompatActivity {
         zoomInButton.setOnClickListener(v -> map.getController().zoomIn());
         zoomOutButton.setOnClickListener(v -> map.getController().zoomOut());
         
+        // Botón para volver a la ubicación actual
+        myLocationButton.setOnClickListener(v -> {
+            map.getController().animateTo(currentUserLocation);
+            map.getController().setZoom(16.0);
+            Toast.makeText(this, "📍 Ubicación actual: Av. Santa Fe 995", Toast.LENGTH_SHORT).show();
+        });
+
         streetCrimeFilterButton.setOnClickListener(v -> toggleStreetCrimeFilter());
         vehicleCrimeFilterButton.setOnClickListener(v -> toggleVehicleCrimeFilter());
 
@@ -643,17 +656,76 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    private void calculateBothRoutesFromCurrentLocation(String destinationAddress) {
+        new Thread(() -> {
+            try {
+                // Usar directamente la ubicación actual sin geocodificar
+                GeoPoint originPoint = currentUserLocation;
+
+                // Solo geocodificar el destino
+                GeoPoint destinationPoint = getGeoPointFromAddress(destinationAddress);
+                if (destinationPoint == null) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "No se pudo encontrar la dirección de destino", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                // Calcular ruta rápida (directa)
+                fastRoutes = getRoutes(originPoint, destinationPoint);
+                if (fastRoutes == null || fastRoutes.isEmpty()) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "No se pudo calcular ninguna ruta", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                // Calcular ruta segura usando waypoints que eviten zonas peligrosas
+                safeRoutes = getSafeRoute(originPoint, destinationPoint);
+                if (safeRoutes.isEmpty()) {
+                    // Fallback: filtrar las rutas normales por seguridad
+                    List<RouteInfo> filteredSafeRoutes = filterSafeRoutes(fastRoutes);
+                    safeRoutes = filteredSafeRoutes.isEmpty() ? fastRoutes : filteredSafeRoutes;
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Usando ruta con menor riesgo disponible.", Toast.LENGTH_LONG).show());
+                }
+
+                // Debug: Verificar que las rutas son diferentes
+                if (!fastRoutes.isEmpty() && !safeRoutes.isEmpty()) {
+                    RouteInfo fastRoute = fastRoutes.get(0);
+                    RouteInfo safeRoute = safeRoutes.get(0);
+
+                    System.out.println("=== DEBUG RUTAS (Desde ubicación actual) ===");
+                    System.out.println("Origen: Ubicación actual (" + originPoint.getLatitude() + ", " + originPoint.getLongitude() + ")");
+                    System.out.println("Ruta rápida - Tiempo: " + fastRoute.timeInMillis/1000 + "s, Distancia: " + fastRoute.distanceInMeters + "m");
+                    System.out.println("Ruta segura - Tiempo: " + safeRoute.timeInMillis/1000 + "s, Distancia: " + safeRoute.distanceInMeters + "m");
+                    System.out.println("Riesgo ruta rápida: " + calculateRouteSafetyScore(fastRoute));
+                    System.out.println("Riesgo ruta segura: " + calculateRouteSafetyScore(safeRoute));
+                }
+
+                runOnUiThread(() -> {
+                    drawBothRoutes(originPoint, destinationPoint);
+                    showRouteOptions();
+                    Toast.makeText(MainActivity.this, "📍 Ruta desde tu ubicación actual", Toast.LENGTH_SHORT).show();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error al calcular las rutas desde tu ubicación", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
     private void selectRouteType(boolean selectSafe) {
         safeRouteSelected = selectSafe;
         
         // Actualizar UI
         if (selectSafe) {
+            // Ruta segura seleccionada
             safeRouteOption.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E3F2FD")));
             fastRouteOption.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+            safeRouteRadio.setImageResource(android.R.drawable.radiobutton_on_background);
             fastRouteRadio.setImageResource(android.R.drawable.radiobutton_off_background);
         } else {
+            // Ruta rápida seleccionada
             safeRouteOption.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
             fastRouteOption.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFEBEE")));
+            safeRouteRadio.setImageResource(android.R.drawable.radiobutton_off_background);
             fastRouteRadio.setImageResource(android.R.drawable.radiobutton_on_background);
         }
 
@@ -669,11 +741,17 @@ public class MainActivity extends AppCompatActivity {
         // Agregar marcadores de origen y destino
         addRouteMarkers(originPoint, destinationPoint);
 
+        // Recopilar todos los puntos para el zoom
+        List<GeoPoint> allPoints = new ArrayList<>();
+        allPoints.add(originPoint);
+        allPoints.add(destinationPoint);
+
         // Dibujar ruta rápida con color según el modo
         if (!fastRoutes.isEmpty()) {
             RouteInfo fastRoute = fastRoutes.get(0);
             int fastColor = vehicleMode ? Color.parseColor("#FF6600") : Color.RED; // Naranja para vehículo, rojo para peatón
             drawSingleRoute(fastRoute.points, fastColor, 6.0f);
+            allPoints.addAll(fastRoute.points);
         }
 
         // Dibujar ruta segura con color según el modo
@@ -681,6 +759,13 @@ public class MainActivity extends AppCompatActivity {
             RouteInfo safeRoute = safeRoutes.get(0);
             int safeColor = vehicleMode ? Color.parseColor("#00AA00") : Color.BLUE; // Verde para vehículo, azul para peatón
             drawSingleRoute(safeRoute.points, safeColor, 8.0f);
+            allPoints.addAll(safeRoute.points);
+        }
+
+        // Hacer zoom para mostrar toda la ruta con padding
+        if (!allPoints.isEmpty()) {
+            BoundingBox boundingBox = BoundingBox.fromGeoPoints(allPoints);
+            map.zoomToBoundingBox(boundingBox, true, 150);
         }
 
         map.invalidate();
@@ -909,7 +994,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<RouteInfo> getSafeRoute(GeoPoint start, GeoPoint end) throws IOException, JSONException {
         System.out.println("\n=== CALCULANDO RUTA SEGURA ===");
-        
+
         // Primero, verificar la ruta directa
         List<RouteInfo> directRoute = getRoutes(start, end);
         if (directRoute.isEmpty()) {
@@ -938,7 +1023,7 @@ public class MainActivity extends AppCompatActivity {
         }
         
         System.out.println("🔄 Generando ruta alternativa con " + avoidanceWaypoints.size() + " waypoint(s) de evasión");
-        
+
         // Construir ruta con waypoints
         return buildRouteWithWaypoints(start, end, avoidanceWaypoints);
     }
@@ -1019,7 +1104,7 @@ public class MainActivity extends AppCompatActivity {
             if (distanceToDanger <= dangerRadius) {
                 // Calcular cuánto desviar (radio + margen de seguridad)
                 double deviationDistance = (dangerRadius - distanceToDanger + 50) / 111000.0; // +50m de margen, convertir a grados
-                
+
                 // Intentar desviar perpendicular a la ruta (ambos lados)
                 GeoPoint waypoint1 = new GeoPoint(
                     closestLat + perpY * deviationDistance,
@@ -1038,7 +1123,7 @@ public class MainActivity extends AppCompatActivity {
                 GeoPoint chosenWaypoint = (dist1 > dist2) ? waypoint1 : waypoint2;
                 
                 waypoints.add(chosenWaypoint);
-                System.out.println("  ✓ Waypoint de evasión: " + 
+                System.out.println("  ✓ Waypoint de evasión: " +
                     String.format("%.6f, %.6f", chosenWaypoint.getLatitude(), chosenWaypoint.getLongitude()) +
                     " (desviación: " + String.format("%.0f", deviationDistance * 111000) + "m)");
             }
@@ -1268,12 +1353,12 @@ public class MainActivity extends AppCompatActivity {
                 // Nivel 3: 40m + (3 * 53.33) = 200m
                 // Nivel 4: 40m + (4 * 53.33) = 253.33m ≈ 253m, pero limitamos a 200m
                 double influenceRadius = Math.min(40 + (crime.severity * 53.33), 200); // 40m para nivel 1, 200m para nivel 4
-                
+
                 // Riesgo decae exponencialmente con la distancia
                 if (distance <= influenceRadius) {
                     // Factor base de riesgo según gravedad (nivel 4 = 4x más riesgo que nivel 1)
                     double severityWeight = crime.severity * 12.5; // 12.5 para nivel 1, 50.0 para nivel 4
-                    
+
                     double riskFactor;
                     if (distance <= 100) {
                         // Muy alto riesgo si está muy cerca

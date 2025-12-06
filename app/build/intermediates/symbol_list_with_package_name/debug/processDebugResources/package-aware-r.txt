@@ -2937,6 +2937,7 @@ drawable ic_arrow_back_black_24
 drawable ic_clear_black_24
 drawable ic_clock_black_24dp
 drawable ic_destination_marker
+drawable ic_gps_button
 drawable ic_hospital
 drawable ic_inactive_crime
 drawable ic_keyboard_black_24dp
@@ -3395,6 +3396,7 @@ id mtrl_view_tag_bottom_padding
 id multiply
 id my_crimes_button
 id my_crimes_recycler_view
+id my_location_button
 id name_edit_text
 id navigation_bar_item_active_indicator_view
 id navigation_bar_item_icon_container
@@ -3464,6 +3466,7 @@ id route_info_layout
 id row_index_key
 id safe_route_info
 id safe_route_option
+id safe_route_radio
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
