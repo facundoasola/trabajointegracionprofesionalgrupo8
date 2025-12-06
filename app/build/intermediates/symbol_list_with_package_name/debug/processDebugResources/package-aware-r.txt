@@ -2929,6 +2929,8 @@ drawable design_ic_visibility
 drawable design_ic_visibility_off
 drawable design_password_eye
 drawable design_snackbar_background
+drawable gradient_blue
+drawable gradient_green
 drawable ic_alert_pedestrian
 drawable ic_alert_vehicle
 drawable ic_alert_warning

@@ -2928,6 +2928,8 @@ int drawable design_ic_visibility 0x7f070086
 int drawable design_ic_visibility_off 0x7f070087
 int drawable design_password_eye 0x7f070088
 int drawable design_snackbar_background 0x7f070089
+int drawable gradient_blue 0x7f07010d
+int drawable gradient_green 0x7f07010e
 int drawable ic_alert_pedestrian 0x7f07008a
 int drawable ic_alert_vehicle 0x7f07008b
 int drawable ic_alert_warning 0x7f07008c
