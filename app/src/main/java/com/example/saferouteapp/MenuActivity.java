@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MenuActivity extends AppCompatActivity {
 
     private TextView userNameTextView, userPointsTextView;
-    private Button viewPointsButton, pendingReportsButton, myCrimesButton, logoutButton, closeButton;
+    private Button viewPointsButton, myCrimesButton, logoutButton, closeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +22,6 @@ public class MenuActivity extends AppCompatActivity {
         userNameTextView = findViewById(R.id.user_name_text_view);
         userPointsTextView = findViewById(R.id.user_points_text_view);
         viewPointsButton = findViewById(R.id.view_points_button);
-        pendingReportsButton = findViewById(R.id.pending_reports_button);
         myCrimesButton = findViewById(R.id.my_crimes_button);
         logoutButton = findViewById(R.id.logout_button);
         closeButton = findViewById(R.id.close_button);
@@ -33,11 +32,6 @@ public class MenuActivity extends AppCompatActivity {
         // Configurar botones
         viewPointsButton.setOnClickListener(v -> {
             Intent intent = new Intent(MenuActivity.this, PointsActivity.class);
-            startActivity(intent);
-        });
-
-        pendingReportsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuActivity.this, PendingReportsActivity.class);
             startActivity(intent);
         });
 

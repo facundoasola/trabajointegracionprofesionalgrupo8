@@ -77,7 +77,6 @@ id my_location_button
 id name_edit_text
 id origin_text
 id password_edit_text
-id pending_reports_button
 id pending_reports_recycler_view
 id points_text_view
 id refresh_button
