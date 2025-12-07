@@ -175,7 +175,7 @@ public class PendingReportsActivity extends AppCompatActivity {
             return;
         }
 
-        CrimeVerifyRequest request = new CrimeVerifyRequest(report.id, userEmail);
+        CrimeVerifyRequest request = new CrimeVerifyRequest(String.valueOf(report.id), userEmail);
 
         ApiClient.getService().verificarCrimen(request).enqueue(new Callback<Void>() {
             @Override
