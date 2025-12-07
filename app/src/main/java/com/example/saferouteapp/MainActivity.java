@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static class CrimeAlert {
+        final long id; // ID del reporte
         final String title;
         final String description;
         final String address; // Dirección que será geocodificada
@@ -108,10 +109,13 @@ public class MainActivity extends AppCompatActivity {
         final String category; // "Delitos contra las personas" o "Delitos contra la propiedad"
         final String subType; // Subtipo específico del crimen
         final int severity; // Gravedad: 1 (leve) a 4 (grave)
+        final String reporter; // Email del usuario que reportó
+        final int verification; // Cantidad de verificaciones
         GeoPoint location; // Se establecerá después de la geocodificación
 
-        CrimeAlert(String title, String description, String address, String timeAgo, String crimeType, 
-                   String category, String subType, int severity) {
+        CrimeAlert(long id, String title, String description, String address, String timeAgo, String crimeType,
+                   String category, String subType, int severity, String reporter, int verification) {
+            this.id = id;
             this.title = title;
             this.description = description;
             this.address = address;
@@ -120,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
             this.category = category;
             this.subType = subType;
             this.severity = severity;
+            this.reporter = reporter;
+            this.verification = verification;
             this.location = null; // Se establecerá más tarde
         }
         
@@ -1811,6 +1817,7 @@ public class MainActivity extends AppCompatActivity {
 
                             // Crear CrimeAlert desde CrimeDto
                             CrimeAlert alert = new CrimeAlert(
+                                crime.id,
                                 crime.category.getCode(),
                                 crime.description,
                                 crime.address,
@@ -1818,7 +1825,9 @@ public class MainActivity extends AppCompatActivity {
                                 category.equals("Delitos contra la propiedad") ? "Robo de vehículos" : "Crimen en vía pública",
                                 category,
                                 subType,
-                                severity
+                                severity,
+                                crime.reporter,
+                                crime.verification
                             );
 
                             // Establecer ubicación directamente desde el backend
@@ -1867,6 +1876,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Alerta 1: Av. Corrientes 300 - Robo con arma
         crimeAlerts.add(new CrimeAlert(
+                -1,
                 "Robo a mano armada",
                 "Se reportó un robo a mano armada en esta zona. El incidente ocurrió en horario nocturno cuando la víctima caminaba sola.",
                 "Av. Corrientes 300, Buenos Aires, Argentina",
@@ -1874,11 +1884,14 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Robo/Arrebato",
-                2
+                2,
+                "ejemplo@saferouteapp.com",
+                3
         ));
 
         // Alerta 2: Av. Corrientes 600 - Robo de pertenencias
         crimeAlerts.add(new CrimeAlert(
+                -2,
                 "Robo de pertenencias",
                 "Robo de celular y billetera reportado por transeúntes. Los delincuentes escaparon en motocicleta.",
                 "Av. Corrientes 600, Buenos Aires, Argentina",
@@ -1886,11 +1899,14 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Robo/Arrebato",
-                2
+                2,
+                "ejemplo@saferouteapp.com",
+                5
         ));
 
         // Alerta 3: Av. Corrientes 900 - Intento de robo
         crimeAlerts.add(new CrimeAlert(
+                -3,
                 "Intento de robo",
                 "Intento de robo frustrado gracias a la intervención de transeúntes. Se recomienda precaución en la zona.",
                 "Av. Corrientes 900, Buenos Aires, Argentina",
@@ -1898,11 +1914,14 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Robo/Arrebato",
+                2,
+                "ejemplo@saferouteapp.com",
                 2
         ));
 
         // Alerta 4: Florida 300 - Arrebato
         crimeAlerts.add(new CrimeAlert(
+                -4,
                 "Arrebato de cartera",
                 "Arrebato de cartera en la zona peatonal durante el horario comercial. La víctima reportó que fueron dos personas en bicicleta.",
                 "Florida 300, Buenos Aires, Argentina",
@@ -1910,11 +1929,14 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Robo/Arrebato",
-                2
+                2,
+                "ejemplo@saferouteapp.com",
+                4
         ));
 
         // Alerta 5: Sarmiento 500 - Robo con intimidación
         crimeAlerts.add(new CrimeAlert(
+                -5,
                 "Robo en taxi",
                 "Robo en el interior de un taxi. El conductor era cómplice del hecho. Se recomienda usar aplicaciones de transporte verificadas.",
                 "Sarmiento 500, Buenos Aires, Argentina",
@@ -1922,11 +1944,14 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Robo/Arrebato",
-                2
+                2,
+                "ejemplo@saferouteapp.com",
+                1
         ));
 
         // Alerta 6: Lavalle 600 - Hurto
         crimeAlerts.add(new CrimeAlert(
+                -6,
                 "Hurto por distracción",
                 "Hurto de billetera mediante distracción en zona comercial. Los delincuentes operaban en grupo fingiendo ser compradores.",
                 "Lavalle 600, Buenos Aires, Argentina",
@@ -1934,11 +1959,14 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Hurto",
-                1
+                1,
+                "ejemplo@saferouteapp.com",
+                2
         ));
 
         // Alerta 7: Av. Santa Fe 800 - Robo con intimidación
         crimeAlerts.add(new CrimeAlert(
+                -7,
                 "Robo nocturno",
                 "Robo con intimidación en parada de colectivo durante la madrugada. Se llevaron teléfono y documentos.",
                 "Av. Santa Fe 800, Buenos Aires, Argentina",
@@ -1946,7 +1974,9 @@ public class MainActivity extends AppCompatActivity {
                 "Crimen en vía pública",
                 "Delitos contra las personas",
                 "Robo/Arrebato",
-                2
+                2,
+                "ejemplo@saferouteapp.com",
+                6
         ));
 
         // ========== DELITOS CONTRA LA PROPIEDAD (VEHÍCULOS) ==========
@@ -1954,6 +1984,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Robo de vehículo 1: Av. Corrientes 450 - Robo vehículo estacionado
         crimeAlerts.add(new CrimeAlert(
+                -8,
                 "Robo de automóvil",
                 "Robo de vehículo Toyota Corolla blanco en estacionamiento. Los delincuentes forzaron la cerradura y se llevaron el auto en menos de 3 minutos.",
                 "Av. Corrientes 450, Buenos Aires, Argentina",
@@ -1961,11 +1992,14 @@ public class MainActivity extends AppCompatActivity {
                 "Robo de vehículos",
                 "Delitos contra la propiedad",
                 "Robo vehículo estacionado",
-                3
+                3,
+                "ejemplo@saferouteapp.com",
+                7
         ));
 
         // Robo de vehículo 2: Lavalle 500 - Robo pertenencias de vehículo
         crimeAlerts.add(new CrimeAlert(
+                -9,
                 "Robo de bicicleta",
                 "Robo de bicicleta de alta gama en plena calle peatonal. Los delincuentes cortaron la cadena de seguridad con herramientas especializadas.",
                 "Lavalle 500, Buenos Aires, Argentina",
@@ -1973,11 +2007,14 @@ public class MainActivity extends AppCompatActivity {
                 "Robo de vehículos",
                 "Delitos contra la propiedad",
                 "Robo pertenencias de vehículo",
-                2
+                2,
+                "ejemplo@saferouteapp.com",
+                4
         ));
 
         // Robo de vehículo 3: Av. Santa Fe 750 - Robo vehículo estacionado
         crimeAlerts.add(new CrimeAlert(
+                -10,
                 "Robo de camioneta",
                 "Sustracción de camioneta Ford EcoSport del estacionamiento de un centro comercial. Los ladrones utilizaron inhibidores de alarma.",
                 "Av. Santa Fe 750, Buenos Aires, Argentina",
@@ -1985,11 +2022,14 @@ public class MainActivity extends AppCompatActivity {
                 "Robo de vehículos",
                 "Delitos contra la propiedad",
                 "Robo vehículo estacionado",
-                3
+                3,
+                "ejemplo@saferouteapp.com",
+                8
         ));
 
         // Robo de vehículo 4: Av. Corrientes 750 - Robo armado
         crimeAlerts.add(new CrimeAlert(
+                -11,
                 "Robo de vehículo a mano armada",
                 "Robo de scooter eléctrico a mano armada mientras el propietario realizaba una entrega. Los delincuentes actuaron en grupo con armas de fuego.",
                 "Av. Corrientes 750, Buenos Aires, Argentina",
@@ -1997,12 +2037,18 @@ public class MainActivity extends AppCompatActivity {
                 "Robo de vehículos",
                 "Delitos contra la propiedad",
                 "Robo armado",
-                4
+                4,
+                "ejemplo@saferouteapp.com",
+                10
         ));
     }
 
     private void addCrimeAlertsToMap() {
-        // Las ubicaciones ya vienen del backend, no necesitamos geocodificar
+        // PRIMERO: Crear zonas de calor (círculos) ANTES de los marcadores
+        // Esto hace que los círculos estén debajo y los marcadores encima
+        createDangerZones();
+
+        // SEGUNDO: Agregar los marcadores ENCIMA de las zonas
         for (CrimeAlert alert : crimeAlerts) {
             if (alert.location != null) { // Solo agregar si tiene ubicación
                 Marker marker = new Marker(map);
@@ -2046,9 +2092,6 @@ public class MainActivity extends AppCompatActivity {
         if (!crimeAlerts.isEmpty()) {
             centerMapOnAlerts();
         }
-
-        // Crear zonas de calor DESPUÉS de agregar las alertas
-        createDangerZones();
     }
     
     private void centerMapOnAlerts() {
@@ -2094,7 +2137,8 @@ public class MainActivity extends AppCompatActivity {
                         severityEmoji + " Gravedad: " + alert.getSeverityText() + " (" + alert.severity + "/4)\n\n" +
                         "📍 Ubicación: " + alert.address + "\n\n" +
                         "🕒 Cuándo: " + alert.timeAgo + "\n\n" +
-                        "📝 Detalles: " + alert.description + "\n\n";
+                        "📝 Detalles: " + alert.description + "\n\n" +
+                        "✓ Verificaciones: " + alert.verification + "\n\n";
 
         // Mensaje de precaución específico según la categoría y gravedad
         if ("Delitos contra la propiedad".equals(alert.category)) {
@@ -2119,11 +2163,65 @@ public class MainActivity extends AppCompatActivity {
         }
         
         builder.setMessage(message);
+
+        // Verificar si el usuario actual es el que reportó este crimen
+        String currentUserEmail = UserSession.getCurrentUserMail();
+        boolean isOwnReport = currentUserEmail != null && currentUserEmail.equals(alert.reporter);
+
+        // Botón de verificación (solo si NO es el propio reporte del usuario)
+        if (!isOwnReport && alert.id > 0) { // Solo para reportes del backend (id positivos)
+            builder.setNeutralButton("✓ Verificar Reporte", (dialog, which) -> {
+                verifyReport(alert);
+            });
+        }
+
+        // Botón de cerrar
         builder.setPositiveButton("Entendido", (dialog, which) -> dialog.dismiss());
         builder.setIcon(R.drawable.ic_alert_warning);
         
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void verifyReport(CrimeAlert alert) {
+        String userEmail = UserSession.getCurrentUserMail();
+        if (userEmail == null) {
+            Toast.makeText(this, "Error: No hay usuario en sesión", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Crear request con el ID del reporte y el email del usuario
+        CrimeVerifyRequest request = new CrimeVerifyRequest(alert.id, userEmail);
+
+        // Llamar al endpoint de verificación
+        ApiClient.getService().verificarCrimen(request).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                runOnUiThread(() -> {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(MainActivity.this,
+                                "✅ Reporte verificado exitosamente",
+                                Toast.LENGTH_SHORT).show();
+
+                        // Recargar los reportes para actualizar el contador de verificaciones
+                        loadCrimesFromBackend();
+                    } else {
+                        Toast.makeText(MainActivity.this,
+                                "⚠️ No se pudo verificar el reporte",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this,
+                            "❌ Error de conexión: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     // Método eliminado - ya no se usa el botón amarillo para mostrar/ocultar todas las zonas
@@ -2758,12 +2856,14 @@ public class MainActivity extends AppCompatActivity {
         // Limpiar zonas de peligro existentes
         map.getOverlays().removeIf(overlay -> overlay instanceof Polygon);
         
-        // Volver a agregar según los filtros activos
-        addFilteredCrimeAlertsToMap();
+        // PRIMERO: Agregar zonas de peligro (círculos) - van al fondo
         if (showStreetCrime || showVehicleCrime) {
             createFilteredDangerZones();
         }
         
+        // SEGUNDO: Agregar marcadores encima - quedan clickeables
+        addFilteredCrimeAlertsToMap();
+
         map.invalidate(); // Refrescar el mapa
     }
     
