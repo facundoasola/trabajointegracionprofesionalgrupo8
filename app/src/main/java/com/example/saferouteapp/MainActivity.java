@@ -231,7 +231,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean longPressHelper(GeoPoint p) {
-                return false;
+                // Mantener presionado: Mostrar diálogo para autocompletar origen o destino
+                showLocationSelectionDialog(p);
+                return true;
             }
         };
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(mapEventsReceiver);
@@ -611,6 +613,184 @@ public class MainActivity extends AppCompatActivity {
         map.invalidate();
     }
 
+    private void showLocationSelectionDialog(GeoPoint point) {
+        // Crear marcador temporal en el punto seleccionado
+        final Marker tempMarker = new Marker(map);
+        tempMarker.setPosition(point);
+        tempMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        tempMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_destination_marker));
+        tempMarker.setTitle("Ubicación seleccionada");
+        map.getOverlays().add(tempMarker);
+        map.invalidate();
+
+        // Crear array de opciones para selección simple
+        String[] options = {
+            "📤 Establecer como Origen",
+            "📥 Establecer como Destino",
+            "🚨 Reportar Crimen Aquí"
+        };
+
+        final int[] selectedOption = {0}; // Por defecto la primera opción
+
+        // Crear diálogo de selección
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("📍 Ubicación seleccionada");
+
+        // Usar SingleChoiceItems para mostrar las opciones con radio buttons
+        builder.setSingleChoiceItems(options, 0, (dialog, which) -> {
+            selectedOption[0] = which;
+        });
+
+        // Botón OK para confirmar la selección
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            switch (selectedOption[0]) {
+                case 0: // Establecer como origen
+                    new Thread(() -> {
+                        String address = getAddressFromGeoPoint(point);
+                        runOnUiThread(() -> {
+                            if (address != null) {
+                                originEditText.setText(address);
+                                Toast.makeText(MainActivity.this,
+                                             "✅ Origen establecido",
+                                             Toast.LENGTH_SHORT).show();
+                            } else {
+                                String coords = String.format("%.6f, %.6f",
+                                                            point.getLatitude(),
+                                                            point.getLongitude());
+                                originEditText.setText(coords);
+                                Toast.makeText(MainActivity.this,
+                                             "✅ Origen establecido (coordenadas)",
+                                             Toast.LENGTH_SHORT).show();
+                            }
+                            map.getOverlays().remove(tempMarker);
+                            map.invalidate();
+                        });
+                    }).start();
+                    break;
+
+                case 1: // Establecer como destino
+                    new Thread(() -> {
+                        String address = getAddressFromGeoPoint(point);
+                        runOnUiThread(() -> {
+                            if (address != null) {
+                                destinationEditText.setText(address);
+                                Toast.makeText(MainActivity.this,
+                                             "✅ Destino establecido",
+                                             Toast.LENGTH_SHORT).show();
+                            } else {
+                                String coords = String.format("%.6f, %.6f",
+                                                            point.getLatitude(),
+                                                            point.getLongitude());
+                                destinationEditText.setText(coords);
+                                Toast.makeText(MainActivity.this,
+                                             "✅ Destino establecido (coordenadas)",
+                                             Toast.LENGTH_SHORT).show();
+                            }
+                            map.getOverlays().remove(tempMarker);
+                            map.invalidate();
+                        });
+                    }).start();
+                    break;
+
+                case 2: // Reportar crimen aquí
+                    map.getOverlays().remove(tempMarker);
+                    map.invalidate();
+                    // Obtener dirección y abrir diálogo de reporte con ubicación prellenada
+                    new Thread(() -> {
+                        String address = getAddressFromGeoPoint(point);
+                        runOnUiThread(() -> {
+                            showReportCrimeDialogWithLocation(point, address);
+                        });
+                    }).start();
+                    break;
+            }
+        });
+
+        // Botón Cancelar
+        builder.setNegativeButton("Cancelar", (dialog, which) -> {
+            map.getOverlays().remove(tempMarker);
+            map.invalidate();
+        });
+
+        // Cuando se cancela el diálogo, remover el marcador temporal
+        builder.setOnCancelListener(dialog -> {
+            map.getOverlays().remove(tempMarker);
+            map.invalidate();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private String getAddressFromGeoPoint(GeoPoint point) {
+        try {
+            // Usar Nominatim API para geocodificación inversa
+            String url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" +
+                        point.getLatitude() + "&lon=" + point.getLongitude() +
+                        "&zoom=18&addressdetails=1";
+
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", "SafeRouteApp");
+
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                // Parsear JSON
+                JSONObject jsonResponse = new JSONObject(response.toString());
+
+                // Intentar obtener la dirección en formato display_name
+                if (jsonResponse.has("display_name")) {
+                    return jsonResponse.getString("display_name");
+                }
+
+                // Si no hay display_name, construir desde address
+                if (jsonResponse.has("address")) {
+                    JSONObject address = jsonResponse.getJSONObject("address");
+                    StringBuilder addressStr = new StringBuilder();
+
+                    // Construir dirección con los componentes disponibles
+                    if (address.has("road")) {
+                        addressStr.append(address.getString("road"));
+                    }
+                    if (address.has("house_number")) {
+                        if (addressStr.length() > 0) addressStr.append(" ");
+                        addressStr.append(address.getString("house_number"));
+                    }
+                    if (address.has("suburb") || address.has("neighbourhood")) {
+                        if (addressStr.length() > 0) addressStr.append(", ");
+                        addressStr.append(address.optString("suburb", address.optString("neighbourhood")));
+                    }
+                    if (address.has("city")) {
+                        if (addressStr.length() > 0) addressStr.append(", ");
+                        addressStr.append(address.getString("city"));
+                    }
+                    if (address.has("country")) {
+                        if (addressStr.length() > 0) addressStr.append(", ");
+                        addressStr.append(address.getString("country"));
+                    }
+
+                    if (addressStr.length() > 0) {
+                        return addressStr.toString();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Error en geocodificación inversa: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void calculateBothRoutes(String originAddress, String destinationAddress) {
         new Thread(() -> {
             try {
@@ -665,30 +845,51 @@ public class MainActivity extends AppCompatActivity {
     private void calculateBothRoutesFromCurrentLocation(String destinationAddress) {
         new Thread(() -> {
             try {
+                android.util.Log.d("MainActivity", "🚀 Iniciando cálculo de rutas desde ubicación actual");
+                android.util.Log.d("MainActivity", "📍 Ubicación actual: " + currentUserLocation.getLatitude() + ", " + currentUserLocation.getLongitude());
+                android.util.Log.d("MainActivity", "🎯 Destino: " + destinationAddress);
+
+                // Validar que currentUserLocation no sea null
+                if (currentUserLocation == null) {
+                    android.util.Log.e("MainActivity", "❌ ERROR: currentUserLocation es null");
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error: No se pudo obtener tu ubicación actual", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
                 // Usar directamente la ubicación actual sin geocodificar
                 GeoPoint originPoint = currentUserLocation;
 
                 // Solo geocodificar el destino
+                android.util.Log.d("MainActivity", "🔍 Geocodificando destino: " + destinationAddress);
                 GeoPoint destinationPoint = getGeoPointFromAddress(destinationAddress);
                 if (destinationPoint == null) {
+                    android.util.Log.e("MainActivity", "❌ ERROR: No se pudo geocodificar el destino");
                     runOnUiThread(() -> Toast.makeText(MainActivity.this, "No se pudo encontrar la dirección de destino", Toast.LENGTH_SHORT).show());
                     return;
                 }
+                android.util.Log.d("MainActivity", "✅ Destino geocodificado: " + destinationPoint.getLatitude() + ", " + destinationPoint.getLongitude());
 
                 // Calcular ruta rápida (directa)
+                android.util.Log.d("MainActivity", "⚡ Calculando ruta rápida...");
                 fastRoutes = getRoutes(originPoint, destinationPoint);
                 if (fastRoutes == null || fastRoutes.isEmpty()) {
+                    android.util.Log.e("MainActivity", "❌ ERROR: No se pudo calcular ruta rápida");
                     runOnUiThread(() -> Toast.makeText(MainActivity.this, "No se pudo calcular ninguna ruta", Toast.LENGTH_SHORT).show());
                     return;
                 }
+                android.util.Log.d("MainActivity", "✅ Ruta rápida calculada: " + fastRoutes.size() + " alternativas");
 
                 // Calcular ruta segura usando waypoints que eviten zonas peligrosas
+                android.util.Log.d("MainActivity", "🛡️ Calculando ruta segura...");
                 safeRoutes = getSafeRoute(originPoint, destinationPoint);
                 if (safeRoutes.isEmpty()) {
+                    android.util.Log.w("MainActivity", "⚠️ No se pudo calcular ruta segura, usando fallback");
                     // Fallback: filtrar las rutas normales por seguridad
                     List<RouteInfo> filteredSafeRoutes = filterSafeRoutes(fastRoutes);
                     safeRoutes = filteredSafeRoutes.isEmpty() ? fastRoutes : filteredSafeRoutes;
                     runOnUiThread(() -> Toast.makeText(MainActivity.this, "Usando ruta con menor riesgo disponible.", Toast.LENGTH_LONG).show());
+                } else {
+                    android.util.Log.d("MainActivity", "✅ Ruta segura calculada");
                 }
 
                 // Debug: Verificar que las rutas son diferentes
@@ -696,23 +897,27 @@ public class MainActivity extends AppCompatActivity {
                     RouteInfo fastRoute = fastRoutes.get(0);
                     RouteInfo safeRoute = safeRoutes.get(0);
 
-                    System.out.println("=== DEBUG RUTAS (Desde ubicación actual) ===");
-                    System.out.println("Origen: Ubicación actual (" + originPoint.getLatitude() + ", " + originPoint.getLongitude() + ")");
-                    System.out.println("Ruta rápida - Tiempo: " + fastRoute.timeInMillis/1000 + "s, Distancia: " + fastRoute.distanceInMeters + "m");
-                    System.out.println("Ruta segura - Tiempo: " + safeRoute.timeInMillis/1000 + "s, Distancia: " + safeRoute.distanceInMeters + "m");
-                    System.out.println("Riesgo ruta rápida: " + calculateRouteSafetyScore(fastRoute));
-                    System.out.println("Riesgo ruta segura: " + calculateRouteSafetyScore(safeRoute));
+                    android.util.Log.d("MainActivity", "=== COMPARACIÓN DE RUTAS ===");
+                    android.util.Log.d("MainActivity", "Origen: Ubicación actual (" + originPoint.getLatitude() + ", " + originPoint.getLongitude() + ")");
+                    android.util.Log.d("MainActivity", "Ruta rápida - Tiempo: " + fastRoute.timeInMillis/1000 + "s, Distancia: " + fastRoute.distanceInMeters + "m");
+                    android.util.Log.d("MainActivity", "Ruta segura - Tiempo: " + safeRoute.timeInMillis/1000 + "s, Distancia: " + safeRoute.distanceInMeters + "m");
+                    android.util.Log.d("MainActivity", "Riesgo ruta rápida: " + calculateRouteSafetyScore(fastRoute));
+                    android.util.Log.d("MainActivity", "Riesgo ruta segura: " + calculateRouteSafetyScore(safeRoute));
                 }
 
+                android.util.Log.d("MainActivity", "🎨 Dibujando rutas en el mapa...");
                 runOnUiThread(() -> {
                     drawBothRoutes(originPoint, destinationPoint);
                     showRouteOptions();
                     Toast.makeText(MainActivity.this, "📍 Ruta desde tu ubicación actual", Toast.LENGTH_SHORT).show();
+                    android.util.Log.d("MainActivity", "✅ Rutas dibujadas correctamente");
                 });
 
             } catch (Exception e) {
+                android.util.Log.e("MainActivity", "❌ ERROR CRÍTICO al calcular rutas desde ubicación actual", e);
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error al calcular las rutas desde tu ubicación", Toast.LENGTH_SHORT).show());
+                String errorMsg = e.getMessage() != null ? e.getMessage() : "Error desconocido";
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error al calcular las rutas: " + errorMsg, Toast.LENGTH_LONG).show());
             }
         }).start();
     }
@@ -1000,13 +1205,17 @@ public class MainActivity extends AppCompatActivity {
 
     private List<RouteInfo> getSafeRoute(GeoPoint start, GeoPoint end) throws IOException, JSONException {
         System.out.println("\n=== CALCULANDO RUTA SEGURA ===");
+        System.out.println("📊 Reportes cargados en memoria: " + crimeAlerts.size());
 
         // Primero, verificar la ruta directa
         List<RouteInfo> directRoute = getRoutes(start, end);
         if (directRoute.isEmpty()) {
+            System.out.println("❌ No se pudo obtener ruta directa");
             return directRoute;
         }
         
+        System.out.println("🗺️ Ruta directa obtenida (" + directRoute.get(0).points.size() + " puntos)");
+
         // Analizar si la ruta directa pasa por zonas peligrosas
         List<CrimeAlert> dangerousPoints = findDangersInRoute(directRoute.get(0));
         
@@ -1017,7 +1226,7 @@ public class MainActivity extends AppCompatActivity {
         
         System.out.println("⚠️ Ruta directa pasa por " + dangerousPoints.size() + " zona(s) de peligro");
         for (CrimeAlert danger : dangerousPoints) {
-            System.out.println("  - " + danger.subType + " (Nivel " + danger.severity + ")");
+            System.out.println("  - " + danger.subType + " (Nivel " + danger.severity + ") en " + danger.address);
         }
         
         // Generar waypoints para evitar las zonas peligrosas
@@ -1031,43 +1240,77 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("🔄 Generando ruta alternativa con " + avoidanceWaypoints.size() + " waypoint(s) de evasión");
 
         // Construir ruta con waypoints
-        return buildRouteWithWaypoints(start, end, avoidanceWaypoints);
+        List<RouteInfo> safeRoute = buildRouteWithWaypoints(start, end, avoidanceWaypoints);
+
+        // VERIFICACIÓN FINAL: Confirmar que la ruta segura realmente evita los peligros
+        if (!safeRoute.isEmpty()) {
+            System.out.println("\n🔍 VERIFICACIÓN FINAL DE RUTA SEGURA:");
+            List<CrimeAlert> remainingDangers = findDangersInRoute(safeRoute.get(0));
+
+            if (remainingDangers.isEmpty()) {
+                System.out.println("✅ ¡ÉXITO! Ruta segura verificada - NO pasa por zonas de peligro");
+            } else {
+                System.out.println("⚠️ ADVERTENCIA: Ruta segura aún pasa por " + remainingDangers.size() + " peligro(s)");
+                for (CrimeAlert danger : remainingDangers) {
+                    System.out.println("  - " + danger.subType + " (Nivel " + danger.severity + ")");
+                }
+                System.out.println("💡 Sugerencia: Aumentar desviaciones o agregar más waypoints");
+            }
+        }
+
+        return safeRoute;
     }
     
     private List<CrimeAlert> findDangersInRoute(RouteInfo route) {
         List<CrimeAlert> dangers = new ArrayList<>();
         
+        System.out.println("🔍 Analizando ruta con " + route.points.size() + " puntos");
+        System.out.println("📊 Reportes totales cargados: " + crimeAlerts.size());
+
         for (CrimeAlert crime : crimeAlerts) {
             if (crime.location == null) continue;
             
-            // Radio de detección según gravedad
+            // Radio de detección según gravedad (MUY AUMENTADOS + 50% buffer)
             double dangerRadius;
             switch (crime.severity) {
-                case 1: dangerRadius = 40; break;
-                case 2: dangerRadius = 80; break;
-                case 3: dangerRadius = 180; break;
-                case 4: dangerRadius = 250; break;
-                default: dangerRadius = 100; break;
+                case 1: dangerRadius = 60; break;   // 40 -> 60 (+50%)
+                case 2: dangerRadius = 120; break;  // 80 -> 120 (+50%)
+                case 3: dangerRadius = 270; break;  // 180 -> 270 (+50%)
+                case 4: dangerRadius = 375; break;  // 250 -> 375 (+50%)
+                default: dangerRadius = 150; break;
             }
             
-            // Verificar si algún punto de la ruta pasa por esta zona peligrosa
+            // Verificar TODOS los puntos de la ruta (verificación exhaustiva)
+            boolean foundDanger = false;
             for (GeoPoint point : route.points) {
                 double distance = calculateDistance(point, crime.location);
                 if (distance <= dangerRadius) {
                     if (!dangers.contains(crime)) {
                         dangers.add(crime);
+                        System.out.println("⚠️ PELIGRO DETECTADO: " + crime.subType +
+                                         " (Nivel " + crime.severity + ", Radio: " + dangerRadius + "m, Distancia: " +
+                                         String.format("%.0f", distance) + "m)");
+                        foundDanger = true;
                     }
                     break;
                 }
             }
         }
         
+        if (dangers.isEmpty()) {
+            System.out.println("✅ Ruta verificada: NO pasa por zonas de peligro");
+        } else {
+            System.out.println("🚨 Ruta pasa por " + dangers.size() + " zona(s) de peligro - GENERANDO DESVÍOS");
+        }
+
         return dangers;
     }
     
     private List<GeoPoint> generateAvoidanceWaypoints(GeoPoint start, GeoPoint end, List<CrimeAlert> dangers) {
         List<GeoPoint> waypoints = new ArrayList<>();
         
+        System.out.println("\n🔧 GENERANDO WAYPOINTS DE EVASIÓN:");
+
         // Calcular vector de dirección de la ruta
         double dx = end.getLongitude() - start.getLongitude();
         double dy = end.getLatitude() - start.getLatitude();
@@ -1079,7 +1322,19 @@ public class MainActivity extends AppCompatActivity {
         double perpX = -dy / routeLength;
         double perpY = dx / routeLength;
         
-        for (CrimeAlert danger : dangers) {
+        // Ordenar peligros por su posición a lo largo de la ruta
+        List<CrimeAlert> sortedDangers = new ArrayList<>(dangers);
+        sortedDangers.sort((d1, d2) -> {
+            double t1 = ((d1.location.getLatitude() - start.getLatitude()) * dy +
+                        (d1.location.getLongitude() - start.getLongitude()) * dx) /
+                        (routeLength * routeLength);
+            double t2 = ((d2.location.getLatitude() - start.getLatitude()) * dy +
+                        (d2.location.getLongitude() - start.getLongitude()) * dx) /
+                        (routeLength * routeLength);
+            return Double.compare(t1, t2);
+        });
+
+        for (CrimeAlert danger : sortedDangers) {
             // Calcular el punto de la ruta más cercano al peligro
             double t = ((danger.location.getLatitude() - start.getLatitude()) * dy + 
                        (danger.location.getLongitude() - start.getLongitude()) * dx) / 
@@ -1096,48 +1351,119 @@ public class MainActivity extends AppCompatActivity {
             // Distancia del punto más cercano al peligro
             double distanceToDanger = calculateDistance(closestPoint, danger.location);
             
-            // Radio de peligro
+            // Radio de peligro (mismo que en findDangersInRoute)
             double dangerRadius;
             switch (danger.severity) {
-                case 1: dangerRadius = 40; break;
-                case 2: dangerRadius = 80; break;
-                case 3: dangerRadius = 180; break;
-                case 4: dangerRadius = 250; break;
-                default: dangerRadius = 100; break;
+                case 1: dangerRadius = 60; break;
+                case 2: dangerRadius = 120; break;
+                case 3: dangerRadius = 270; break;
+                case 4: dangerRadius = 375; break;
+                default: dangerRadius = 150; break;
             }
             
-            // Si el punto más cercano está dentro del radio de peligro, crear waypoint de evasión
-            if (distanceToDanger <= dangerRadius) {
-                // Calcular cuánto desviar (radio + margen de seguridad)
-                double deviationDistance = (dangerRadius - distanceToDanger + 50) / 111000.0; // +50m de margen, convertir a grados
+            // DESVIACIÓN MASIVA: radio completo + 200m mínimo de seguridad
+            double minSafeDistance = dangerRadius + 200; // Garantizar estar MUY lejos
+            double deviationMeters = Math.max(minSafeDistance, dangerRadius * 1.8); // Al menos 1.8x el radio
+            double deviationDistance = deviationMeters / 111000.0; // Convertir a grados
 
-                // Intentar desviar perpendicular a la ruta (ambos lados)
-                GeoPoint waypoint1 = new GeoPoint(
-                    closestLat + perpY * deviationDistance,
-                    closestLon + perpX * deviationDistance
+            System.out.println("  📍 Peligro: " + danger.subType + " (Nivel " + danger.severity + ")");
+            System.out.println("     Radio: " + dangerRadius + "m, Desviación: " + deviationMeters + "m");
+
+            // Generar múltiples candidatos de waypoint en diferentes direcciones
+            List<GeoPoint> candidates = new ArrayList<>();
+
+            // 1. Perpendicular derecha
+            candidates.add(new GeoPoint(
+                closestLat + perpY * deviationDistance,
+                closestLon + perpX * deviationDistance
+            ));
+
+            // 2. Perpendicular izquierda
+            candidates.add(new GeoPoint(
+                closestLat - perpY * deviationDistance,
+                closestLon - perpX * deviationDistance
+            ));
+
+            // 3. Diagonal derecha-adelante
+            candidates.add(new GeoPoint(
+                closestLat + (perpY * 0.7 + dy/routeLength * 0.3) * deviationDistance,
+                closestLon + (perpX * 0.7 + dx/routeLength * 0.3) * deviationDistance
+            ));
+
+            // 4. Diagonal izquierda-adelante
+            candidates.add(new GeoPoint(
+                closestLat + (-perpY * 0.7 + dy/routeLength * 0.3) * deviationDistance,
+                closestLon + (-perpX * 0.7 + dx/routeLength * 0.3) * deviationDistance
+            ));
+
+            // Evaluar candidatos y elegir el mejor
+            GeoPoint bestWaypoint = null;
+            double bestScore = -1;
+
+            for (GeoPoint candidate : candidates) {
+                // VERIFICACIÓN ESTRICTA: El waypoint debe estar FUERA de TODOS los círculos
+                boolean isSafe = true;
+                double minDistToAnyDanger = Double.MAX_VALUE;
+
+                for (CrimeAlert checkDanger : crimeAlerts) {
+                    if (checkDanger.location == null) continue;
+
+                    double checkRadius;
+                    switch (checkDanger.severity) {
+                        case 1: checkRadius = 60; break;
+                        case 2: checkRadius = 120; break;
+                        case 3: checkRadius = 270; break;
+                        case 4: checkRadius = 375; break;
+                        default: checkRadius = 150; break;
+                    }
+
+                    double distToCheck = calculateDistance(candidate, checkDanger.location);
+                    minDistToAnyDanger = Math.min(minDistToAnyDanger, distToCheck);
+
+                    // Si está dentro de algún círculo (+50m buffer), NO es válido
+                    if (distToCheck < checkRadius + 50) {
+                        isSafe = false;
+                        break;
+                    }
+                }
+
+                // Solo considerar waypoints seguros
+                if (isSafe) {
+                    // Score: preferir los que están más lejos de todos los peligros
+                    double score = minDistToAnyDanger;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestWaypoint = candidate;
+                    }
+                }
+            }
+
+            // Agregar el mejor waypoint encontrado
+            if (bestWaypoint != null) {
+                waypoints.add(bestWaypoint);
+                System.out.println("     ✅ Waypoint agregado (distancia segura mín: " +
+                                 String.format("%.0f", bestScore) + "m)");
+            } else {
+                System.out.println("     ⚠️ No se encontró waypoint seguro, intentando desviación mayor");
+
+                // Último recurso: desviación EXTREMA
+                double extremeDeviation = deviationMeters * 2.5 / 111000.0;
+                GeoPoint extremeWaypoint = new GeoPoint(
+                    closestLat + perpY * extremeDeviation,
+                    closestLon + perpX * extremeDeviation
                 );
-                
-                GeoPoint waypoint2 = new GeoPoint(
-                    closestLat - perpY * deviationDistance,
-                    closestLon - perpX * deviationDistance
-                );
-                
-                // Elegir el waypoint que esté más lejos de TODOS los peligros
-                double dist1 = getMinDistanceToDangers(waypoint1, crimeAlerts);
-                double dist2 = getMinDistanceToDangers(waypoint2, crimeAlerts);
-                
-                GeoPoint chosenWaypoint = (dist1 > dist2) ? waypoint1 : waypoint2;
-                
-                waypoints.add(chosenWaypoint);
-                System.out.println("  ✓ Waypoint de evasión: " +
-                    String.format("%.6f, %.6f", chosenWaypoint.getLatitude(), chosenWaypoint.getLongitude()) +
-                    " (desviación: " + String.format("%.0f", deviationDistance * 111000) + "m)");
+                waypoints.add(extremeWaypoint);
+                System.out.println("     🆘 Waypoint extremo agregado (desviación: " +
+                                 String.format("%.0f", deviationMeters * 2.5) + "m)");
             }
         }
         
-        // Limitar a máximo 5 waypoints
-        if (waypoints.size() > 5) {
-            waypoints = waypoints.subList(0, 5);
+        System.out.println("  ✓ Total waypoints generados: " + waypoints.size());
+
+        // Limitar a máximo 8 waypoints (aumentado de 5)
+        if (waypoints.size() > 8) {
+            waypoints = waypoints.subList(0, 8);
+            System.out.println("  ⚠️ Limitado a 8 waypoints");
         }
         
         return waypoints;
@@ -2389,6 +2715,240 @@ public class MainActivity extends AppCompatActivity {
         map.getOverlays().removeAll(dangerZones);
         dangerZones.clear();
         map.invalidate();
+    }
+
+    private void showReportCrimeDialogWithLocation(GeoPoint location, String address) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("🚨 Reportar Crimen en Ubicación Seleccionada");
+
+        // Inflar el layout del formulario
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_report_crime, null);
+        builder.setView(dialogView);
+
+        // Referencias a los campos del formulario
+        EditText addressInput = dialogView.findViewById(R.id.address_input);
+        EditText incidentDescriptionInput = dialogView.findViewById(R.id.incident_description_input);
+        EditText timeInput = dialogView.findViewById(R.id.time_input);
+        Button selectImageButton = dialogView.findViewById(R.id.select_image_button);
+        TextView imageSelectedText = dialogView.findViewById(R.id.image_selected_text);
+        android.widget.Spinner categorySpinner = dialogView.findViewById(R.id.category_spinner);
+        android.widget.Spinner subtypeSpinner = dialogView.findViewById(R.id.subtype_spinner);
+        TextView severityInfoText = dialogView.findViewById(R.id.severity_info_text);
+
+        // PRELLENAR LA DIRECCIÓN con la ubicación seleccionada
+        if (address != null && !address.isEmpty()) {
+            addressInput.setText(address);
+        } else {
+            // Si no hay dirección, usar coordenadas
+            String coords = String.format("%.6f, %.6f", location.getLatitude(), location.getLongitude());
+            addressInput.setText(coords);
+        }
+
+        // Deshabilitar edición de dirección (opcional - ya está seleccionada)
+        // addressInput.setEnabled(false); // Comentado para permitir edición si el usuario quiere ajustar
+
+        // Configurar categorías
+        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad", "Otros"};
+        android.widget.ArrayAdapter<String> categoryAdapter = new android.widget.ArrayAdapter<>(
+            this, android.R.layout.simple_spinner_dropdown_item, categories);
+        categorySpinner.setAdapter(categoryAdapter);
+
+        // Mapa de subtipos por categoría con sus gravedades
+        Map<String, Map<String, Integer>> subtypesByCategoryWithSeverity = new HashMap<>();
+
+        // Delitos contra las personas
+        Map<String, Integer> personCrimes = new HashMap<>();
+        personCrimes.put("HOMICIDIO_DOLOSO", 4);
+        personCrimes.put("HOMICIO_CULPOSO", 4);
+        personCrimes.put("LESIONES_GRAVES", 3);
+        personCrimes.put("LESIONES_LEVES", 2);
+        personCrimes.put("ROBO_CON_VIOLENCIA", 3);
+        personCrimes.put("ROBO_SIN_VIOLENCIA", 2);
+        subtypesByCategoryWithSeverity.put("Delitos contra las personas", personCrimes);
+
+        // Delitos contra la propiedad
+        Map<String, Integer> propertyCrimes = new HashMap<>();
+        propertyCrimes.put("ROBO_VIA_PUBLICA", 2);
+        propertyCrimes.put("HURTO", 1);
+        subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
+
+        // Otros
+        Map<String, Integer> otherCrimes = new HashMap<>();
+        otherCrimes.put("DESORDENES_PUBLICOS", 1);
+        subtypesByCategoryWithSeverity.put("Otros", otherCrimes);
+
+        // Configurar listener para cambio de categoría
+        categorySpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                String selectedCategory = categories[position];
+                Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(selectedCategory);
+
+                String[] subtypeArray = subtypes.keySet().toArray(new String[0]);
+                android.widget.ArrayAdapter<String> subtypeAdapter = new android.widget.ArrayAdapter<>(
+                    MainActivity.this, android.R.layout.simple_spinner_dropdown_item, subtypeArray);
+                subtypeSpinner.setAdapter(subtypeAdapter);
+
+                // Actualizar gravedad cuando cambia el subtipo
+                subtypeSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> subParent, View subView, int subPosition, long subId) {
+                        String selectedSubtype = subtypeArray[subPosition];
+                        Integer severity = subtypes.get(selectedSubtype);
+
+                        String severityEmoji;
+                        String severityText;
+                        int severityColor;
+
+                        switch (severity) {
+                            case 1:
+                                severityEmoji = "🟢";
+                                severityText = "Leve";
+                                severityColor = Color.parseColor("#4CAF50");
+                                break;
+                            case 2:
+                                severityEmoji = "🟡";
+                                severityText = "Moderado";
+                                severityColor = Color.parseColor("#FFC107");
+                                break;
+                            case 3:
+                                severityEmoji = "🟠";
+                                severityText = "Grave";
+                                severityColor = Color.parseColor("#FF5722");
+                                break;
+                            case 4:
+                                severityEmoji = "🔴";
+                                severityText = "Muy Grave";
+                                severityColor = Color.parseColor("#8B0000");
+                                break;
+                            default:
+                                severityEmoji = "⚪";
+                                severityText = "Desconocido";
+                                severityColor = Color.GRAY;
+                                break;
+                        }
+
+                        severityInfoText.setText(severityEmoji + " Gravedad: " + severityText + " (" + severity + "/4)");
+                        severityInfoText.setTextColor(severityColor);
+                    }
+
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+                });
+
+                // Trigger inicial
+                if (subtypeArray.length > 0) {
+                    subtypeSpinner.setSelection(0);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
+
+        // Simular selección de imagen
+        selectImageButton.setOnClickListener(v -> {
+            imageSelectedText.setText("✅ Imagen seleccionada: foto_evidencia.jpg");
+            Toast.makeText(this, "Función de galería no implementada en la demo", Toast.LENGTH_SHORT).show();
+        });
+
+        // Trigger inicial de categoría
+        categorySpinner.setSelection(0);
+
+        builder.setPositiveButton("Enviar Reporte", null);
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setOnClickListener(v -> {
+            String userEmail = UserSession.getCurrentUserMail();
+            if (userEmail == null) {
+                Toast.makeText(MainActivity.this, "Error: No hay usuario en sesión", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String addressText = addressInput.getText().toString().trim();
+            String description = incidentDescriptionInput.getText().toString().trim();
+            String time = timeInput.getText().toString().trim();
+            String category = categorySpinner.getSelectedItem().toString();
+            String subtype = subtypeSpinner.getSelectedItem().toString();
+
+            if (addressText.isEmpty() || description.isEmpty() || time.isEmpty()) {
+                Toast.makeText(MainActivity.this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Obtener gravedad
+            Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(category);
+            int severity = subtypes.get(subtype);
+
+            // Deshabilitar botón para evitar múltiples envíos
+            positiveButton.setEnabled(false);
+            positiveButton.setText("Enviando...");
+
+            // Usar la ubicación que ya tenemos del long press
+            new Thread(() -> {
+                try {
+                    // Crear request para el backend
+                    CrimeCreateRequest request = new CrimeCreateRequest(
+                            subtype,
+                            description,
+                            addressText,
+                            String.valueOf(location.getLatitude()),
+                            String.valueOf(location.getLongitude()),
+                            userEmail,
+                            time
+                    );
+
+                    // Enviar al backend
+                    ApiClient.getService().crearCrimen(request).enqueue(new Callback<CrimeDto>() {
+                        @Override
+                        public void onResponse(Call<CrimeDto> call, Response<CrimeDto> response) {
+                            if (response.isSuccessful()) {
+                                runOnUiThread(() -> {
+                                    dialog.dismiss();
+                                    showReportSuccessDialog(category, subtype, severity);
+                                    Toast.makeText(MainActivity.this,
+                                            "✅ Reporte enviado exitosamente",
+                                            Toast.LENGTH_SHORT).show();
+                                    loadCrimesFromBackend();
+                                });
+                            } else {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(MainActivity.this,
+                                            "Error al enviar reporte (código: " + response.code() + ")",
+                                            Toast.LENGTH_SHORT).show();
+                                    positiveButton.setEnabled(true);
+                                    positiveButton.setText("Enviar Reporte");
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<CrimeDto> call, Throwable t) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(MainActivity.this,
+                                        "Error de conexión: " + t.getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                                positiveButton.setEnabled(true);
+                                positiveButton.setText("Enviar Reporte");
+                            });
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this,
+                                "Error: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        positiveButton.setEnabled(true);
+                        positiveButton.setText("Enviar Reporte");
+                    });
+                }
+            }).start();
+        });
     }
 
     private void showReportCrimeDialog() {
