@@ -1,5 +1,6 @@
 package com.example.saferouteapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ public class PointsActivity extends AppCompatActivity {
 
     private TextView pointsTextView, userNameTextView, userEmailTextView, logrostextView, verificacionestextView, confirmacionestextView;
     private Button backButton;
+    private androidx.cardview.widget.CardView pointsCard, achievementsCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +29,26 @@ public class PointsActivity extends AppCompatActivity {
         logrostextView = findViewById(R.id.logros_text_view);
         verificacionestextView = findViewById(R.id.verificaciones_text_view);
         confirmacionestextView = findViewById(R.id.confirmaciones_text_view);
+        pointsCard = findViewById(R.id.points_card);
+        achievementsCard = findViewById(R.id.achievements_card);
 
         // Mostrar datos del usuario actual
         displayUserInfo();
 
         // Botón para volver
         backButton.setOnClickListener(v -> finish());
+        
+        // Card de puntos clickeable - abre marketplace
+        pointsCard.setOnClickListener(v -> {
+            Intent intent = new Intent(PointsActivity.this, MarketplaceActivity.class);
+            startActivity(intent);
+        });
+        
+        // Card de logros clickeable - abre achievements
+        achievementsCard.setOnClickListener(v -> {
+            Intent intent = new Intent(PointsActivity.this, AchievementsActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void displayUserInfo() {
@@ -41,7 +57,11 @@ public class PointsActivity extends AppCompatActivity {
             userNameTextView.setText("👤 " + user.name + " " + user.surname);
             userEmailTextView.setText("📧 " + user.mail);
             pointsTextView.setText(String.valueOf(user.points));
-            logrostextView.setText(user.achievements.stream().map(Logro::getName).collect(Collectors.joining(", ")));
+            
+            // Mostrar logros en formato "X / 6"
+            int totalAchievements = user.achievements != null ? user.achievements.size() : 0;
+            logrostextView.setText(totalAchievements + " / 6");
+            
             verificacionestextView.setText(String.valueOf(user.validations));
             confirmacionestextView.setText(String.valueOf(user.confirmedReports));
         } else {

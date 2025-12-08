@@ -2638,7 +2638,24 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\facun\\Desktop\\ritmofitttt\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values-night\\themes.xml",
+                    "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\217e011d2470175b7bb5701e8ebb040d\\transformed\\material-1.9.0\\res\\values-night-v8\\values-night-v8.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,130,241,330,431,538,645,744,851,954,1042,1166,1268,1370,1486,1588,1702,1830,1946,2068,2204,2324,2458,2578,2690,2816,2933,3057,3187,3309,3447,3581,3697",
+                        "endColumns": "74,110,88,100,106,106,98,106,102,87,123,101,101,115,101,113,127,115,121,135,119,133,119,111,125,116,123,129,121,137,133,115,119",
+                        "endOffsets": "125,236,325,426,533,640,739,846,949,1037,1161,1263,1365,1481,1583,1697,1825,1941,2063,2199,2319,2453,2573,2685,2811,2928,3052,3182,3304,3442,3576,3692,3812"
+                    },
+                    "to": {
+                        "startLines": "18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,47,48,49,50,51",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "1202,1277,1388,1477,1578,1685,1792,1891,1998,2101,2189,2313,2415,2517,2633,2735,2849,2977,3093,3215,3351,3471,3605,3725,3837,4052,4169,4293,4423,4545,4683,4817,4933",
+                        "endColumns": "74,110,88,100,106,106,98,106,102,87,123,101,101,115,101,113,127,115,121,135,119,133,119,111,125,116,123,129,121,137,133,115,119",
+                        "endOffsets": "1272,1383,1472,1573,1680,1787,1886,1993,2096,2184,2308,2410,2512,2628,2730,2844,2972,3088,3210,3346,3466,3600,3720,3832,3958,4164,4288,4418,4540,4678,4812,4928,5048"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\facun\\Desktop\\Nueva carpeta (20)\\saferoute ultimo commit\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values-night\\themes.xml",
                     "from": {
                         "startLines": "3",
                         "startColumns": "4",
@@ -2654,23 +2671,6 @@
                         "endLines": "10",
                         "endColumns": "12",
                         "endOffsets": "565"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\217e011d2470175b7bb5701e8ebb040d\\transformed\\material-1.9.0\\res\\values-night-v8\\values-night-v8.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,130,241,330,431,538,645,744,851,954,1042,1166,1268,1370,1486,1588,1702,1830,1946,2068,2204,2324,2458,2578,2690,2816,2933,3057,3187,3309,3447,3581,3697",
-                        "endColumns": "74,110,88,100,106,106,98,106,102,87,123,101,101,115,101,113,127,115,121,135,119,133,119,111,125,116,123,129,121,137,133,115,119",
-                        "endOffsets": "125,236,325,426,533,640,739,846,949,1037,1161,1263,1365,1481,1583,1697,1825,1941,2063,2199,2319,2453,2573,2685,2811,2928,3052,3182,3304,3442,3576,3692,3812"
-                    },
-                    "to": {
-                        "startLines": "18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,47,48,49,50,51",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "1202,1277,1388,1477,1578,1685,1792,1891,1998,2101,2189,2313,2415,2517,2633,2735,2849,2977,3093,3215,3351,3471,3605,3725,3837,4052,4169,4293,4423,4545,4683,4817,4933",
-                        "endColumns": "74,110,88,100,106,106,98,106,102,87,123,101,101,115,101,113,127,115,121,135,119,133,119,111,125,116,123,129,121,137,133,115,119",
-                        "endOffsets": "1272,1383,1472,1573,1680,1787,1886,1993,2096,2184,2308,2410,2512,2628,2730,2844,2972,3088,3210,3346,3466,3600,3720,3832,3958,4164,4288,4418,4540,4678,4812,4928,5048"
                     }
                 }
             ]
@@ -5107,23 +5107,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\facun\\Desktop\\ritmofitttt\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\colors.xml",
-                    "from": {
-                        "startLines": "8,18,3,4,5,14,15,13,12,6,7,9",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "340,734,104,152,200,592,642,534,482,248,294,383",
-                        "endColumns": "41,57,46,46,46,48,49,56,50,44,44,41",
-                        "endOffsets": "377,787,146,194,242,636,687,586,528,288,334,420"
-                    },
-                    "to": {
-                        "startLines": "638,697,945,946,947,950,951,952,953,962,963,966",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "32659,36752,55503,55550,55597,55759,55808,55858,55915,56548,56593,56759",
-                        "endColumns": "41,57,46,46,46,48,49,56,50,44,44,41",
-                        "endOffsets": "32696,36805,55545,55592,55639,55803,55853,55910,55961,56588,56633,56796"
-                    }
-                },
-                {
                     "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\36c9f7797b6de445e1f3369ac47a6d06\\transformed\\osmdroid-android-6.1.14\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50",
@@ -5160,23 +5143,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\facun\\Desktop\\ritmofitttt\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\strings.xml",
-                    "from": {
-                        "startLines": "1",
-                        "startColumns": "4",
-                        "startOffsets": "17",
-                        "endColumns": "46",
-                        "endOffsets": "59"
-                    },
-                    "to": {
-                        "startLines": "1955",
-                        "startColumns": "4",
-                        "startOffsets": "128938",
-                        "endColumns": "46",
-                        "endOffsets": "128980"
-                    }
-                },
-                {
                     "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\219cb1d312b011a3cd20c467d0619766\\transformed\\transition-1.2.0\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11",
@@ -5191,6 +5157,23 @@
                         "startOffsets": "118457,118497,119629,119853,119908,121404,121458,121510,121559,121620",
                         "endColumns": "39,46,42,54,46,53,51,48,60,49",
                         "endOffsets": "118492,118539,119667,119903,119950,121453,121505,121554,121615,121665"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\facun\\Desktop\\Nueva carpeta (20)\\saferoute ultimo commit\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\strings.xml",
+                    "from": {
+                        "startLines": "1",
+                        "startColumns": "4",
+                        "startOffsets": "17",
+                        "endColumns": "46",
+                        "endOffsets": "59"
+                    },
+                    "to": {
+                        "startLines": "1955",
+                        "startColumns": "4",
+                        "startOffsets": "128938",
+                        "endColumns": "46",
+                        "endOffsets": "128980"
                     }
                 },
                 {
@@ -5323,6 +5306,23 @@
                     }
                 },
                 {
+                    "source": "C:\\Users\\facun\\Desktop\\Nueva carpeta (20)\\saferoute ultimo commit\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\colors.xml",
+                    "from": {
+                        "startLines": "8,18,3,4,5,14,15,13,12,6,7,9",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "340,734,104,152,200,592,642,534,482,248,294,383",
+                        "endColumns": "41,57,46,46,46,48,49,56,50,44,44,41",
+                        "endOffsets": "377,787,146,194,242,636,687,586,528,288,334,420"
+                    },
+                    "to": {
+                        "startLines": "638,697,945,946,947,950,951,952,953,962,963,966",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "32659,36752,55503,55550,55597,55759,55808,55858,55915,56548,56593,56759",
+                        "endColumns": "41,57,46,46,46,48,49,56,50,44,44,41",
+                        "endOffsets": "32696,36805,55545,55592,55639,55803,55853,55910,55961,56588,56633,56796"
+                    }
+                },
+                {
                     "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\2e61ee85b717901566137146fee15228\\transformed\\appcompat-resources-1.6.1\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,18,24,34,50",
@@ -5339,6 +5339,25 @@
                         "endLines": "9227,9233,9243,12745,12749",
                         "endColumns": "24,24,24,24,24",
                         "endOffsets": "634049,634227,634511,763647,763774"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\facun\\Desktop\\Nueva carpeta (20)\\saferoute ultimo commit\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\themes.xml",
+                    "from": {
+                        "startLines": "3,13",
+                        "startColumns": "4,4",
+                        "startOffsets": "142,703",
+                        "endLines": "11,13",
+                        "endColumns": "12,72",
+                        "endOffsets": "695,771"
+                    },
+                    "to": {
+                        "startLines": "2550,6506",
+                        "startColumns": "4,4",
+                        "startOffsets": "178345,455331",
+                        "endLines": "2558,6506",
+                        "endColumns": "12,71",
+                        "endOffsets": "178849,455398"
                     }
                 },
                 {
@@ -5380,6 +5399,23 @@
                     }
                 },
                 {
+                    "source": "C:\\Users\\facun\\Desktop\\Nueva carpeta (20)\\saferoute ultimo commit\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\ic_launcher_background.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "57",
+                        "endColumns": "56",
+                        "endOffsets": "109"
+                    },
+                    "to": {
+                        "startLines": "696",
+                        "startColumns": "4",
+                        "startOffsets": "36695",
+                        "endColumns": "56",
+                        "endOffsets": "36747"
+                    }
+                },
+                {
                     "source": "C:\\Users\\facun\\.gradle\\caches\\9.0-milestone-1\\transforms\\72dccf57343e3e96a258c41dfa36d2e0\\transformed\\startup-runtime-1.1.1\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2",
@@ -5413,42 +5449,6 @@
                         "endLines": "504,1111,1112,1113,1121,1122,1123,1787,12516",
                         "endColumns": "55,58,47,55,74,75,71,65,24",
                         "endOffsets": "25533,66407,66455,66511,67197,67273,67345,118639,755817"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\facun\\Desktop\\ritmofitttt\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\ic_launcher_background.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "57",
-                        "endColumns": "56",
-                        "endOffsets": "109"
-                    },
-                    "to": {
-                        "startLines": "696",
-                        "startColumns": "4",
-                        "startOffsets": "36695",
-                        "endColumns": "56",
-                        "endOffsets": "36747"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\facun\\Desktop\\ritmofitttt\\trabajointegracionprofesionalgrupo8\\app\\src\\main\\res\\values\\themes.xml",
-                    "from": {
-                        "startLines": "3,13",
-                        "startColumns": "4,4",
-                        "startOffsets": "142,703",
-                        "endLines": "11,13",
-                        "endColumns": "12,72",
-                        "endOffsets": "695,771"
-                    },
-                    "to": {
-                        "startLines": "2550,6506",
-                        "startColumns": "4,4",
-                        "startOffsets": "178345,455331",
-                        "endLines": "2558,6506",
-                        "endColumns": "12,71",
-                        "endOffsets": "178849,455398"
                     }
                 },
                 {

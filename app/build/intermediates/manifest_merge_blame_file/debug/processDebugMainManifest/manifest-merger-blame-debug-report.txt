@@ -10,17 +10,17 @@
 10
 11    <!-- Permisos necesarios -->
 12    <uses-permission android:name="android.permission.INTERNET" />
-12-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:6:5-67
-12-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:6:22-64
+12-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:6:5-67
+12-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:6:22-64
 13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-13-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:7:5-79
-13-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:7:22-76
+13-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:7:5-79
+13-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:7:22-76
 14    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-14-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:8:5-81
-14-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:8:22-78
+14-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:8:5-81
+14-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:8:22-78
 15    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-15-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:9:5-79
-15-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:9:22-76
+15-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:9:5-79
+15-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:9:22-76
 16
 17    <permission
 17-->[androidx.core:core:1.9.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\2d338c9fe50b710abf4013d86bbf37ce\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
@@ -68,177 +68,197 @@
 39-->[org.osmdroid:osmdroid-android:6.1.14] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\36c9f7797b6de445e1f3369ac47a6d06\transformed\osmdroid-android-6.1.14\AndroidManifest.xml:25:9-33
 40
 41    <application
-41-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:11:5-70:19
+41-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:11:5-82:19
 42        android:allowBackup="true"
-42-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:12:9-35
+42-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:12:9-35
 43        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 43-->[androidx.core:core:1.9.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\2d338c9fe50b710abf4013d86bbf37ce\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
 44        android:dataExtractionRules="@xml/data_extraction_rules"
-44-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:13:9-65
+44-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:13:9-65
 45        android:debuggable="true"
 46        android:extractNativeLibs="false"
 47        android:fullBackupContent="@xml/backup_rules"
-47-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:14:9-54
+47-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:14:9-54
 48        android:icon="@mipmap/ic_launcher"
-48-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:15:9-43
+48-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:15:9-43
 49        android:label="@string/app_name"
-49-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:16:9-41
+49-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:16:9-41
 50        android:roundIcon="@mipmap/ic_launcher_round"
-50-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:17:9-54
+50-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:17:9-54
 51        android:supportsRtl="true"
-51-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:18:9-35
+51-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:18:9-35
 52        android:testOnly="true"
 53        android:theme="@style/Theme.SafeRouteApp"
-53-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:19:9-50
+53-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:19:9-50
 54        android:usesCleartextTraffic="true" >
-54-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:20:9-44
+54-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:20:9-44
 55
 56        <!-- Login Activity - Pantalla de inicio -->
 57        <activity
-57-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:24:9-32:20
+57-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:24:9-32:20
 58            android:name="com.example.saferouteapp.LoginActivity"
-58-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:25:13-42
+58-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:25:13-42
 59            android:exported="true"
-59-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:26:13-36
+59-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:26:13-36
 60            android:theme="@style/Theme.SafeRouteApp" >
-60-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:27:13-54
+60-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:27:13-54
 61            <intent-filter>
-61-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:28:13-31:29
+61-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:28:13-31:29
 62                <action android:name="android.intent.action.MAIN" />
-62-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:29:17-69
-62-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:29:25-66
+62-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:29:17-69
+62-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:29:25-66
 63
 64                <category android:name="android.intent.category.LAUNCHER" />
-64-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:30:17-77
-64-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:30:27-74
+64-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:30:17-77
+64-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:30:27-74
 65            </intent-filter>
 66        </activity>
 67
 68        <!-- Register Activity - Pantalla de registro -->
 69        <activity
-69-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:35:9-39:59
+69-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:35:9-39:59
 70            android:name="com.example.saferouteapp.RegisterActivity"
-70-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:36:13-45
+70-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:36:13-45
 71            android:exported="false"
-71-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:37:13-37
+71-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:37:13-37
 72            android:parentActivityName="com.example.saferouteapp.LoginActivity"
-72-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:39:13-56
+72-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:39:13-56
 73            android:theme="@style/Theme.SafeRouteApp" />
-73-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:38:13-54
+73-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:38:13-54
 74
 75        <!-- Main Activity - Pantalla principal con mapa -->
 76        <activity
-76-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:42:9-44:40
+76-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:42:9-44:40
 77            android:name="com.example.saferouteapp.MainActivity"
-77-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:43:13-41
+77-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:43:13-41
 78            android:exported="false" />
-78-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:44:13-37
+78-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:44:13-37
 79
 80        <!-- Menu Activity - Menú principal -->
 81        <activity
-81-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:47:9-50:57
+81-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:47:9-50:57
 82            android:name="com.example.saferouteapp.MenuActivity"
-82-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:48:13-41
+82-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:48:13-41
 83            android:exported="false"
-83-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:49:13-37
+83-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:49:13-37
 84            android:theme="@style/Theme.SafeRouteApp" />
-84-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:50:13-54
+84-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:50:13-54
 85
 86        <!-- Points Activity - Ver puntos del usuario -->
 87        <activity
-87-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:53:9-56:57
+87-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:53:9-56:57
 88            android:name="com.example.saferouteapp.PointsActivity"
-88-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:54:13-43
+88-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:54:13-43
 89            android:exported="false"
-89-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:55:13-37
+89-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:55:13-37
 90            android:theme="@style/Theme.SafeRouteApp" />
-90-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:56:13-54
+90-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:56:13-54
 91
 92        <!-- Pending Reports Activity - Verificar reportes -->
 93        <activity
-93-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:59:9-62:57
+93-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:59:9-62:57
 94            android:name="com.example.saferouteapp.PendingReportsActivity"
-94-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:60:13-51
+94-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:60:13-51
 95            android:exported="false"
-95-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:61:13-37
+95-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:61:13-37
 96            android:theme="@style/Theme.SafeRouteApp" />
-96-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:62:13-54
+96-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:62:13-54
 97
 98        <!-- My Crimes Activity - Mis reportes -->
 99        <activity
-99-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:65:9-68:57
+99-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:65:9-68:57
 100            android:name="com.example.saferouteapp.MyCrimesActivity"
-100-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:66:13-45
+100-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:66:13-45
 101            android:exported="false"
-101-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:67:13-37
+101-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:67:13-37
 102            android:theme="@style/Theme.SafeRouteApp" />
-102-->C:\Users\facun\Desktop\ritmofitttt\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:68:13-54
+102-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:68:13-54
 103
-104        <provider
-104-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
-105            android:name="androidx.startup.InitializationProvider"
-105-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
-106            android:authorities="com.example.saferouteapp.androidx-startup"
-106-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
-107            android:exported="false" >
-107-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
-108            <meta-data
-108-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
-109                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-109-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
-110                android:value="androidx.startup" />
-110-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
-111            <meta-data
-111-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e417208b6b32d43cfbe81a26e6978b74\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:29:13-31:52
-112                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-112-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e417208b6b32d43cfbe81a26e6978b74\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:30:17-78
-113                android:value="androidx.startup" />
-113-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e417208b6b32d43cfbe81a26e6978b74\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:31:17-49
-114            <meta-data
-114-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
-115                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-115-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
-116                android:value="androidx.startup" />
-116-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
-117        </provider>
-118
-119        <receiver
-119-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
-120            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-120-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
-121            android:directBootAware="false"
-121-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
-122            android:enabled="true"
-122-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
-123            android:exported="true"
-123-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
-124            android:permission="android.permission.DUMP" >
-124-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
-125            <intent-filter>
-125-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
-126                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-126-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
-126-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
-127            </intent-filter>
-128            <intent-filter>
-128-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
-129                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-129-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
-129-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
-130            </intent-filter>
-131            <intent-filter>
-131-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
-132                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-132-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
-132-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
-133            </intent-filter>
-134            <intent-filter>
-134-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
-135                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-135-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
-135-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
-136            </intent-filter>
-137        </receiver>
-138    </application>
-139
-140</manifest>
+104        <!-- Achievements Activity - Ver logros obtenidos -->
+105        <activity
+105-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:71:9-74:57
+106            android:name="com.example.saferouteapp.AchievementsActivity"
+106-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:72:13-49
+107            android:exported="false"
+107-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:73:13-37
+108            android:theme="@style/Theme.SafeRouteApp" />
+108-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:74:13-54
+109
+110        <!-- Marketplace Activity - Canjear puntos por recompensas -->
+111        <activity
+111-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:77:9-80:57
+112            android:name="com.example.saferouteapp.MarketplaceActivity"
+112-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:78:13-48
+113            android:exported="false"
+113-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:79:13-37
+114            android:theme="@style/Theme.SafeRouteApp" />
+114-->C:\Users\facun\Desktop\Nueva carpeta (20)\saferoute ultimo commit\trabajointegracionprofesionalgrupo8\app\src\main\AndroidManifest.xml:80:13-54
+115
+116        <provider
+116-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+117            android:name="androidx.startup.InitializationProvider"
+117-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+118            android:authorities="com.example.saferouteapp.androidx-startup"
+118-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+119            android:exported="false" >
+119-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+120            <meta-data
+120-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+121                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+121-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+122                android:value="androidx.startup" />
+122-->[androidx.emoji2:emoji2:1.2.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\8e234ec380e9c507dd7110f050223bf4\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+123            <meta-data
+123-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e417208b6b32d43cfbe81a26e6978b74\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:29:13-31:52
+124                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+124-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e417208b6b32d43cfbe81a26e6978b74\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:30:17-78
+125                android:value="androidx.startup" />
+125-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\e417208b6b32d43cfbe81a26e6978b74\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:31:17-49
+126            <meta-data
+126-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+127                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+127-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+128                android:value="androidx.startup" />
+128-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+129        </provider>
+130
+131        <receiver
+131-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+132            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+132-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+133            android:directBootAware="false"
+133-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+134            android:enabled="true"
+134-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+135            android:exported="true"
+135-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+136            android:permission="android.permission.DUMP" >
+136-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+137            <intent-filter>
+137-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+138                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+138-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+138-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+139            </intent-filter>
+140            <intent-filter>
+140-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+141                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+141-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+141-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+142            </intent-filter>
+143            <intent-filter>
+143-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+144                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+144-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+144-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+145            </intent-filter>
+146            <intent-filter>
+146-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+147                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+147-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+147-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\facun\.gradle\caches\9.0-milestone-1\transforms\d1a6d362bb3caf774a33799fb169c7a6\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+148            </intent-filter>
+149        </receiver>
+150    </application>
+151
+152</manifest>

@@ -67,6 +67,18 @@
             android:exported="false"
             android:theme="@style/Theme.SafeRouteApp" />
 
+        <!-- Achievements Activity - Ver logros obtenidos -->
+        <activity
+            android:name=".AchievementsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
+        <!-- Marketplace Activity - Canjear puntos por recompensas -->
+        <activity
+            android:name=".MarketplaceActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SafeRouteApp" />
+
     </application>
 
 </manifest>

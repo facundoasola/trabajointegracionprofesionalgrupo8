@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -86,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean showStreetCrime = true;
     private boolean showVehicleCrime = true;
     private boolean vehicleMode = false; // Modo vehículo para rutas específicas
+    
+    // Sistema de puntos (solo se actualiza después de verificaciones)
+    private int lastKnownPoints = 0;
 
     private static class SafePoint {
         final String name;
@@ -605,14 +609,23 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // Limpiar marcadores de alertas para recrearlos
-        map.getOverlays().removeAll(crimeAlertMarkers);
-        crimeAlertMarkers.clear();
+        clearCrimeAlertMarkersFromMap();
         
         // Volver a agregar los marcadores de puntos seguros y alertas de crimen
         addSafePointsToMap();
         addCrimeAlertsToMap(); // Esto volverá a geocodificar y agregar las alertas
         
         map.invalidate();
+    }
+
+    /**
+     * Limpia todos los marcadores de crímenes del mapa
+     * CRÍTICO: Previene el bug donde filtros cambian la apariencia de marcadores no confirmados
+     */
+    private void clearCrimeAlertMarkersFromMap() {
+        System.out.println("🧹 Limpiando " + crimeAlertMarkers.size() + " marcadores de crímenes existentes");
+        map.getOverlays().removeAll(crimeAlertMarkers);
+        crimeAlertMarkers.clear();
     }
 
     private void showLocationSelectionDialog(GeoPoint point) {
@@ -1272,14 +1285,44 @@ public class MainActivity extends AppCompatActivity {
         for (CrimeAlert crime : crimeAlerts) {
             if (crime.location == null) continue;
             
-            // Radio de detección según gravedad (MUY AUMENTADOS + 50% buffer)
+            // Solo considerar crímenes CONFIRMADOS
+            if (!"CONFIRMADO".equals(crime.status)) {
+                continue;
+            }
+            
+            // Solo considerar crímenes relevantes al modo de transporte
+            if (vehicleMode) {
+                // Modo vehículo: solo crímenes de propiedad/vehículos
+                if (!"Delitos contra la propiedad".equals(crime.category)) {
+                    continue;
+                }
+            } else {
+                // Modo transeúnte: solo crímenes contra personas
+                if (!"Delitos contra las personas".equals(crime.category)) {
+                    continue;
+                }
+            }
+            
+            // Radio de detección según gravedad y modo de transporte
             double dangerRadius;
-            switch (crime.severity) {
-                case 1: dangerRadius = 60; break;   // 40 -> 60 (+50%)
-                case 2: dangerRadius = 120; break;  // 80 -> 120 (+50%)
-                case 3: dangerRadius = 270; break;  // 180 -> 270 (+50%)
-                case 4: dangerRadius = 375; break;  // 250 -> 375 (+50%)
-                default: dangerRadius = 150; break;
+            if (vehicleMode) {
+                // Vehículos: radios más grandes (menos libertad de movimiento)
+                switch (crime.severity) {
+                    case 1: dangerRadius = 40; break;
+                    case 2: dangerRadius = 80; break;
+                    case 3: dangerRadius = 180; break;
+                    case 4: dangerRadius = 250; break;
+                    default: dangerRadius = 100; break;
+                }
+            } else {
+                // Peatones: radios más pequeños (más libertad de movimiento)
+                switch (crime.severity) {
+                    case 1: dangerRadius = 25; break;
+                    case 2: dangerRadius = 50; break;
+                    case 3: dangerRadius = 100; break;
+                    case 4: dangerRadius = 150; break;
+                    default: dangerRadius = 75; break;
+                }
             }
             
             // Verificar TODOS los puntos de la ruta (verificación exhaustiva)
@@ -1676,23 +1719,46 @@ public class MainActivity extends AppCompatActivity {
     private double calculatePointRisk(GeoPoint point) {
         double totalRisk = 0.0;
         
-        // Riesgo por alertas de crimen individuales
+        // **CORREGIDO**: Riesgo por alertas de crimen - SOLO crímenes CONFIRMADOS y relevantes al modo de transporte
         for (CrimeAlert crime : crimeAlerts) {
             if (crime.location != null) {
+                // CORRECCIÓN: Solo considerar crímenes CONFIRMADOS para rutas
+                if (!"CONFIRMADO".equals(crime.status)) {
+                    continue; // Saltar crímenes no confirmados
+                }
+                
+                // CORRECCIÓN: Solo considerar crímenes relevantes al modo de transporte
+                if (vehicleMode) {
+                    // Modo vehículo: solo crímenes de propiedad/vehículos
+                    if (!"Delitos contra la propiedad".equals(crime.category)) {
+                        continue;
+                    }
+                } else {
+                    // Modo transeúnte: solo crímenes contra personas
+                    if (!"Delitos contra las personas".equals(crime.category)) {
+                        continue;
+                    }
+                }
+                
                 double distance = calculateDistance(point, crime.location);
                 
-                // Radio de influencia ajustado según gravedad del crimen
-                // Nivel 1: 40m + (1 * 53.33) = 93.33m ≈ 93m
-                // Nivel 2: 40m + (2 * 53.33) = 146.67m ≈ 147m
-                // Nivel 3: 40m + (3 * 53.33) = 200m
-                // Nivel 4: 40m + (4 * 53.33) = 253.33m ≈ 253m, pero limitamos a 200m
-                double influenceRadius = Math.min(40 + (crime.severity * 53.33), 200); // 40m para nivel 1, 200m para nivel 4
+                // Radio de influencia ajustado según gravedad y modo de transporte
+                double influenceRadius;
+                if (vehicleMode) {
+                    // Vehículos: radios más amplios
+                    influenceRadius = Math.min(40 + (crime.severity * 53.33), 200);
+                } else {
+                    // Peatones: radios más precisos y menores
+                    influenceRadius = Math.min(25 + (crime.severity * 30), 120);
+                }
 
                 // Riesgo decae exponencialmente con la distancia
                 if (distance <= influenceRadius) {
-                    // Factor base de riesgo según gravedad (nivel 4 = 4x más riesgo que nivel 1)
-                    double severityWeight = crime.severity * 12.5; // 12.5 para nivel 1, 50.0 para nivel 4
-
+                    // Factor base de riesgo según gravedad
+                    double severityWeight = crime.severity * 12.5;
+                    
+                    // Ya solo consideramos crímenes confirmados, no necesitamos multiplicador
+                    
                     double riskFactor;
                     if (distance <= 100) {
                         // Muy alto riesgo si está muy cerca
@@ -2107,56 +2173,81 @@ public class MainActivity extends AppCompatActivity {
                                 crime.address = "Ubicación desconocida";
                             }
 
-                            // Mapear tipos del backend a categorías de la app
-                            String category;
+                            // **CORREGIDO**: Usar directamente los valores del backend sin lógica de palabras
                             String subType = crime.category.getCode();
-                            int severity;
-
-                            String typeLower = crime.category.getCode().toLowerCase();
-
-                            // Determinar categoría y gravedad basado en el tipo
-                            if (typeLower.contains("vehículo") ||
-                                typeLower.contains("vehiculo") ||
-                                typeLower.contains("auto") ||
-                                typeLower.contains("moto") ||
-                                typeLower.contains("bicicleta")) {
-                                category = "Delitos contra la propiedad";
-
-                                if (typeLower.contains("armado") || typeLower.contains("arma")) {
-                                    severity = 4;
-                                } else if (typeLower.contains("estacionado")) {
-                                    severity = 3;
-                                } else {
-                                    severity = 2;
-                                }
-                            } else {
-                                category = "Delitos contra las personas";
-
-                                if (typeLower.contains("homicidio")) {
-                                    severity = 4;
-                                } else if (typeLower.contains("agresión grave")) {
-                                    severity = 3;
-                                } else if (typeLower.contains("robo") || typeLower.contains("arrebato")) {
-                                    severity = 2;
-                                } else {
-                                    severity = 1;
-                                }
+                            int severity = crime.category.getValue(); // Severidad viene directa del backend
+                            
+                            // Mapear códigos exactos del backend a categorías de la UI
+                            String category;
+                            String crimeCode = crime.category.getCode();
+                            
+                            // **CORRECCIÓN BACKEND**: Usar los códigos reales del backend (db.go líneas 25-32)
+                            // El backend ahora usa Type para clasificar: "CONTRA_LA_PROPIEDAD" o "CONTRA_LAS_PERSONAS"
+                            String backendType = crime.category.getType();
+                            switch (backendType) {
+                                case "CONTRA_LA_PROPIEDAD":
+                                    category = "Delitos contra la propiedad";
+                                    break;
+                                case "CONTRA_LAS_PERSONAS":
+                                    category = "Delitos contra las personas";
+                                    break;
+                                default:
+                                    category = "Otros delitos";
+                                    break;
                             }
 
+                            // **SIMPLIFICADO**: Mapeo directo basado en Type del backend
+                            String crimeType;
+                            
+                            if ("CONTRA_LA_PROPIEDAD".equals(backendType)) {
+                                // TODOS los delitos contra la propiedad son de vehículos
+                                crimeType = "Robo de vehículos";
+                            } else {
+                                // TODOS los otros (CONTRA_LAS_PERSONAS) son de transeúntes
+                                crimeType = "Crimen en vía pública";
+                            }
+                            
+                            System.out.println("🗂️ MAPEO BACKEND -> UI (SIMPLIFICADO):");
+                            System.out.println("   ├─ Código backend: '" + crimeCode + "'");
+                            System.out.println("   ├─ Tipo backend: '" + backendType + "'");
+                            System.out.println("   ├─ Severidad backend: " + severity);
+                            System.out.println("   ├─ Status: '" + crime.status + "'");
+                            System.out.println("   ├─ Categoría UI: '" + category + "'");
+                            System.out.println("   └─ Filtro UI: '" + crimeType + "' (Propiedad=Vehículos, Personas=Transeúntes)");
+                            
+                            // **CORRECCIÓN**: Crear título y estado basado en el status del backend
+                            String title = crime.description;
+                            String timeStatus;
+                            
+                            switch (crime.status) {
+                                case "CONFIRMADO":
+                                    timeStatus = "Confirmado (" + crime.verification + " verificaciones)";
+                                    break;
+                                case "PENDIENTE":
+                                    timeStatus = "⚠️ Pendiente de verificación (" + crime.verification + "/3)";
+                                    break;
+                                case "VALIDACION_COMUNIDAD":
+                                    timeStatus = "🔄 En validación comunitaria (" + crime.verification + "/3)";
+                                    break;
+                                default:
+                                    timeStatus = crime.status + " (" + crime.verification + " verificaciones)";
+                                    break;
+                            }
+                            
                             // Crear CrimeAlert desde CrimeDto
                             CrimeAlert alert = new CrimeAlert(
                                 crime.id,
-                                crime.category.getCode(),
+                                title,
                                 crime.description,
                                 crime.address,
-                                crime.confirmed ? "Confirmado" : "Pendiente (" + crime.verification + " verificaciones)",
-                                category.equals("Delitos contra la propiedad") ? "Robo de vehículos" : "Crimen en vía pública",
+                                timeStatus,
+                                crimeType, // Usar el crimeType mapeado correctamente
                                 category,
                                 subType,
                                 severity,
                                 crime.reporter,
-                                    crime.verification,
-                                    crime.status
+                                crime.verification,
+                                crime.status
                             );
 
                             // Establecer ubicación directamente desde el backend
@@ -2180,8 +2271,9 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this,
                             "⚠️ Error al cargar incidentes. Usando datos de ejemplo.",
                             Toast.LENGTH_SHORT).show();
-                    // Fallback a datos hardcodeados si el backend falla
-
+                    
+                    // **MEJORADO**: Fallback a datos hardcodeados más completos si el backend falla
+                    setupHardcodedCrimeAlerts();
                     addCrimeAlertsToMap();
                 }
             }
@@ -2191,8 +2283,9 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this,
                         "⚠️ Sin conexión. Usando datos de ejemplo.",
                         Toast.LENGTH_SHORT).show();
-                // Fallback a datos hardcodeados si hay error de conexión
-
+                
+                // **MEJORADO**: Fallback a datos hardcodeados más completos si hay error de conexión
+                setupHardcodedCrimeAlerts();
                 addCrimeAlertsToMap();
             }
         });
@@ -2201,48 +2294,38 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void addCrimeAlertsToMap() {
+        System.out.println("🗺️ === AGREGANDO CRÍMENES AL MAPA ===");
+        System.out.println("📊 Total de crímenes: " + crimeAlerts.size());
+        System.out.println("🔧 Filtros activos - Calles: " + showStreetCrime + ", Vehículos: " + showVehicleCrime);
+        
+        // **CORRECCIÓN CRÍTICA**: Limpiar marcadores existentes primero para evitar bug de filtros
+        clearCrimeAlertMarkersFromMap();
+        
         // PRIMERO: Crear zonas de calor (círculos) ANTES de los marcadores
         // Esto hace que los círculos estén debajo y los marcadores encima
         createDangerZones();
 
-        // SEGUNDO: Agregar los marcadores ENCIMA de las zonas
+        // SEGUNDO: Agregar los marcadores ENCIMA de las zonas usando el método mejorado
+        int markersAdded = 0;
         for (CrimeAlert alert : crimeAlerts) {
-            if (alert.location != null) { // Solo agregar si tiene ubicación
-                Marker marker = new Marker(map);
-                marker.setPosition(alert.location);
-                marker.setTitle(alert.title);
-                marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-
-                // Seleccionar ícono y color según la categoría del crimen
-                Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
-
-                if ("Delitos contra la propiedad".equals(alert.category)) {
-                    // Robos de vehículos - Color violeta
-                    if (alertIcon != null) {
-                        alertIcon.setTint(Color.parseColor("#9C27B0")); // Violeta
-                    }
-                } else {
-                    // Delitos contra las personas (transeúntes) - Color rojo
-                    if (alertIcon != null) {
-                        alertIcon.setTint(Color.parseColor("#F44336")); // Rojo
-                    }
-                }
-                marker.setIcon(alertIcon);
-
-                // Configurar el click listener para mostrar el diálogo detallado
-                marker.setOnMarkerClickListener((marker1, mapView) -> {
-                    showCrimeAlertDialog(alert);
-                    return true; // Consumir el evento
-                });
-
+            if (alert.location != null && shouldShowCrime(alert)) { // Solo agregar si tiene ubicación Y pasa el filtro
+                System.out.println("🎯 Procesando: " + alert.title + " (tipo: " + alert.crimeType + ", status: " + alert.status + ")");
+                
+                // **CORRECCIÓN**: Determinar si el crimen está activo basándose en su estado
+                boolean isActive = "CONFIRMADO".equals(alert.status);
+                
+                // Usar el método mejorado que maneja diferentes tipos de marcadores
+                Marker marker = createCrimeMarker(alert, isActive);
                 map.getOverlays().add(marker);
                 crimeAlertMarkers.add(marker);
-
+                
                 // Agregar animación de rebote al marcador
                 startCrimeAlertAnimation(marker);
+                markersAdded++;
             }
         }
+        System.out.println("✅ Marcadores agregados al mapa: " + markersAdded + "/" + crimeAlerts.size());
+        
         map.invalidate();
 
         // Centrar el mapa en la zona de las alertas si hay alertas
@@ -2362,6 +2445,9 @@ public class MainActivity extends AppCompatActivity {
 
                         // Recargar los reportes para actualizar el contador de verificaciones
                         loadCrimesFromBackend();
+                        
+                        // Verificar si ganó puntos o logros (solo después de verificación exitosa)
+                        checkUserRewardsAfterVerification();
                     } else {
                         Toast.makeText(MainActivity.this,
                                 "⚠️ No se pudo verificar el reporte",
@@ -2381,19 +2467,130 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Crea un marcador de crimen mejorado con diferentes estilos según severidad y categoría
+     * Restaura la funcionalidad completa de la implementación anterior
+     */
+    private Marker createCrimeMarker(CrimeAlert alert, boolean isActive) {
+        System.out.println("🔧 Creando marcador mejorado: " + alert.title + " | Activo: " + isActive + " | Severidad: " + alert.severity);
+        
+        Marker marker = new Marker(map);
+        marker.setPosition(alert.location);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        
+        if (isActive) {
+            System.out.println("  ➡️ Marcador ACTIVO: ícono con tamaño basado en severidad");
+            
+            // Título con emoji según categoría
+            String categoryEmoji = "Delitos contra la propiedad".equals(alert.category) ? "🚗" : "⚠️";
+            marker.setTitle(categoryEmoji + " " + alert.title);
+            marker.setSnippet(alert.timeAgo + " - " + alert.crimeType);
+            marker.setSubDescription(alert.description + "\n" + alert.timeAgo + "\nSeveridad: " + alert.getSeverityText());
+            
+            // Seleccionar ícono base
+            Drawable alertIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
+            
+            if (alertIcon != null) {
+                // **ACTUALIZADO**: Colores según el nuevo esquema
+                if ("Delitos contra la propiedad".equals(alert.category)) {
+                    // Delitos contra la propiedad (vehículos) - Color violeta
+                    int baseColor = Color.parseColor("#9C27B0"); // Violeta base
+                    int adjustedColor = adjustColorBySeverity(baseColor, alert.severity);
+                    alertIcon.setTint(adjustedColor);
+                } else {
+                    // Delitos contra las personas (transeúntes) - Color ROJO como solicitado
+                    int baseColor = Color.parseColor("#F44336"); // Rojo base
+                    int adjustedColor = adjustColorBySeverity(baseColor, alert.severity);
+                    alertIcon.setTint(adjustedColor);
+                }
+                
+                // **CLAVE: Ajustar el tamaño del ícono según severidad**
+                int iconSize = getIconSizeBySeverity(alert.severity);
+                alertIcon.setBounds(0, 0, iconSize, iconSize);
+            }
+            
+            marker.setIcon(alertIcon);
+            
+            // Click listener para mostrar diálogo detallado
+            marker.setOnMarkerClickListener((marker1, mapView) -> {
+                showCrimeAlertDialog(alert);
+                return true;
+            });
+        } else {
+            System.out.println("  ➡️ Marcador INACTIVO: ícono diferente");
+            
+            // Marcador para crímenes inactivos/pendientes
+            marker.setTitle("📍 " + alert.title + " (Pendiente)");
+            marker.setSnippet(alert.timeAgo + " - Verificaciones: " + alert.verification);
+            marker.setSubDescription(alert.description + "\n" + alert.timeAgo + "\n⚪ Pendiente de verificación");
+            
+            // Usar ícono diferente para inactivos si está disponible
+            Drawable inactiveIcon = ContextCompat.getDrawable(this, R.drawable.ic_inactive_crime);
+            if (inactiveIcon == null) {
+                // Fallback: usar el ícono normal pero con color diferente
+                inactiveIcon = ContextCompat.getDrawable(this, R.drawable.ic_alert_warning);
+                if (inactiveIcon != null) {
+                    inactiveIcon.setTint(Color.parseColor("#FFC107")); // Amarillo para pendientes
+                }
+            }
+            marker.setIcon(inactiveIcon);
+            
+            // Click listener para crímenes inactivos
+            marker.setOnMarkerClickListener((marker1, mapView) -> {
+                showCrimeAlertDialog(alert); // Usar el mismo diálogo mejorado
+                return true;
+            });
+        }
+        
+        return marker;
+    }
+
+    /**
+     * Ajusta la intensidad del color según la severidad del crimen
+     */
+    private int adjustColorBySeverity(int baseColor, int severity) {
+        float alpha = 0.6f + (severity * 0.1f); // De 0.7 a 1.0 según severidad
+        alpha = Math.min(alpha, 1.0f);
+        
+        int red = (int) (Color.red(baseColor) * alpha);
+        int green = (int) (Color.green(baseColor) * alpha);
+        int blue = (int) (Color.blue(baseColor) * alpha);
+        
+        return Color.rgb(red, green, blue);
+    }
+
+    /**
+     * Devuelve el tamaño del ícono según la severidad (en píxeles)
+     */
+    private int getIconSizeBySeverity(int severity) {
+        switch (severity) {
+            case 1: return 48;  // Leve - Pequeño
+            case 2: return 64;  // Moderado - Mediano
+            case 3: return 80;  // Grave - Grande
+            case 4: return 96;  // Muy Grave - Muy grande
+            default: return 64; // Por defecto mediano
+        }
+    }
+
     // Método eliminado - ya no se usa el botón amarillo para mostrar/ocultar todas las zonas
 
     private void createDangerZones() {
         // Primero, limpiar zonas existentes
         hideDangerZones();
         
-        // Crear zonas individuales para cada crimen basadas en su gravedad
+        // **NUEVO REQUERIMIENTO**: Solo crear círculos para crímenes CONFIRMADOS que pasan los filtros
+        int circlesCreated = 0;
         for (CrimeAlert crime : crimeAlerts) {
-            if (crime.location != null) {
-                // Usar la gravedad del crimen directamente (1-4)
+            if (crime.location != null && shouldShowCrime(crime) && "CONFIRMADO".equals(crime.status)) {
+                // Solo crímenes confirmados tienen círculo de peligro
+                System.out.println("🔵 Creando círculo para: " + crime.title + " (CONFIRMADO, severidad " + crime.severity + ")");
                 createDangerZone(crime.location, crime.severity);
+                circlesCreated++;
+            } else if (crime.location != null && shouldShowCrime(crime)) {
+                System.out.println("⚪ Sin círculo para: " + crime.title + " (Status: " + crime.status + ")");
             }
         }
+        System.out.println("📊 Total círculos creados: " + circlesCreated + "/" + crimeAlerts.size());
         
         map.invalidate();
     }
@@ -2473,7 +2670,7 @@ public class MainActivity extends AppCompatActivity {
     private void createDangerZone(GeoPoint center, int severity) {
         if (center == null) return;
 
-        // Determinar color, tamaño y transparencia basado en la gravedad del crimen (1-4)
+        // **RESTAURADO**: Usar EXACTAMENTE los valores de la implementación funcional
         int color;
         double radiusInMeters;
         int alpha;
@@ -2578,35 +2775,30 @@ public class MainActivity extends AppCompatActivity {
         // Deshabilitar edición de dirección (opcional - ya está seleccionada)
         // addressInput.setEnabled(false); // Comentado para permitir edición si el usuario quiere ajustar
 
-        // Configurar categorías
-        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad", "Otros"};
+        // **RESTAURADO**: Configurar categorías EXACTAMENTE como en la implementación funcional
+        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad"};
         android.widget.ArrayAdapter<String> categoryAdapter = new android.widget.ArrayAdapter<>(
             this, android.R.layout.simple_spinner_dropdown_item, categories);
         categorySpinner.setAdapter(categoryAdapter);
 
-        // Mapa de subtipos por categoría con sus gravedades
+        // **RESTAURADO**: Mapa de subtipos EXACTAMENTE como en la implementación funcional
         Map<String, Map<String, Integer>> subtypesByCategoryWithSeverity = new HashMap<>();
 
         // Delitos contra las personas
         Map<String, Integer> personCrimes = new HashMap<>();
-        personCrimes.put("HOMICIDIO_DOLOSO", 4);
-        personCrimes.put("HOMICIO_CULPOSO", 4);
-        personCrimes.put("LESIONES_GRAVES", 3);
-        personCrimes.put("LESIONES_LEVES", 2);
-        personCrimes.put("ROBO_CON_VIOLENCIA", 3);
-        personCrimes.put("ROBO_SIN_VIOLENCIA", 2);
+        personCrimes.put("Homicidio", 4);
+        personCrimes.put("Agresión grave", 3);
+        personCrimes.put("Robo/Arrebato", 2);
+        personCrimes.put("Hurto", 1);
+        personCrimes.put("Agresión leve", 1);
         subtypesByCategoryWithSeverity.put("Delitos contra las personas", personCrimes);
 
         // Delitos contra la propiedad
         Map<String, Integer> propertyCrimes = new HashMap<>();
-        propertyCrimes.put("ROBO_VIA_PUBLICA", 2);
-        propertyCrimes.put("HURTO", 1);
+        propertyCrimes.put("Robo armado", 4);
+        propertyCrimes.put("Robo vehículo estacionado", 3);
+        propertyCrimes.put("Robo pertenencias de vehículo", 2);
         subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
-
-        // Otros
-        Map<String, Integer> otherCrimes = new HashMap<>();
-        otherCrimes.put("DESORDENES_PUBLICOS", 1);
-        subtypesByCategoryWithSeverity.put("Otros", otherCrimes);
 
         // Configurar listener para cambio de categoría
         categorySpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
@@ -2800,36 +2992,40 @@ public class MainActivity extends AppCompatActivity {
         android.widget.Spinner subtypeSpinner = dialogView.findViewById(R.id.subtype_spinner);
         TextView severityInfoText = dialogView.findViewById(R.id.severity_info_text);
         
-        // Configurar categorías
-        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad", "Otros"};
+        // **RESTAURADO**: Configurar categorías EXACTAMENTE como en la implementación funcional
+        String[] categories = {"Delitos contra las personas", "Delitos contra la propiedad"};
         android.widget.ArrayAdapter<String> categoryAdapter = new android.widget.ArrayAdapter<>(
             this, android.R.layout.simple_spinner_dropdown_item, categories);
         categorySpinner.setAdapter(categoryAdapter);
         
-        // Mapa de subtipos por categoría con sus gravedades (basado en la nueva API)
+        // **CORRECCIÓN BACKEND**: Mapeo UI → Códigos Backend con severidades reales
+        Map<String, Map<String, Object[]>> subtypesByCategoryWithData = new HashMap<>();
+        
+        // Delitos contra las personas - mapear a códigos del backend
+        Map<String, Object[]> personCrimes = new HashMap<>();
+        personCrimes.put("Homicidio", new Object[]{"HOMICIDIO", 4});
+        personCrimes.put("Agresión grave", new Object[]{"AGRESION_GRAVES", 3});
+        personCrimes.put("Agresión leve", new Object[]{"AGRESION_LEVES", 2});
+        personCrimes.put("Robo/Arrebato", new Object[]{"ROBO_ARREBATO", 2});
+        personCrimes.put("Hurto", new Object[]{"HURTO", 1});
+        subtypesByCategoryWithData.put("Delitos contra las personas", personCrimes);
+        
+        // Delitos contra la propiedad - mapear a códigos del backend
+        Map<String, Object[]> propertyCrimes = new HashMap<>();
+        propertyCrimes.put("Robo con violencia", new Object[]{"ROBO_CON_VIOLENCIA", 3});
+        propertyCrimes.put("Robo de pertenencias", new Object[]{"ROBO_PERTENENCIAS", 2});
+        propertyCrimes.put("Robo sin presencia", new Object[]{"ROBO_SIN_PRESENCIA", 3});
+        subtypesByCategoryWithData.put("Delitos contra la propiedad", propertyCrimes);
+        
+        // Crear mapa solo de severidades para compatibilidad
         Map<String, Map<String, Integer>> subtypesByCategoryWithSeverity = new HashMap<>();
-        
-        // Delitos contra las personas
-        Map<String, Integer> personCrimes = new HashMap<>();
-        personCrimes.put("HOMICIDIO_DOLOSO", 4);
-        personCrimes.put("HOMICIO_CULPOSO", 4);
-        personCrimes.put("LESIONES_GRAVES", 3);
-        personCrimes.put("LESIONES_LEVES", 2);
-        personCrimes.put("ROBO_CON_VIOLENCIA", 3);
-        personCrimes.put("ROBO_SIN_VIOLENCIA", 2);
-        subtypesByCategoryWithSeverity.put("Delitos contra las personas", personCrimes);
-        
-        // Delitos contra la propiedad
-        Map<String, Integer> propertyCrimes = new HashMap<>();
-        propertyCrimes.put("ROBO_VIA_PUBLICA", 2);
-        propertyCrimes.put("HURTO", 1);
-        subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
-
-        // Otros
-        Map<String, Integer> otherCrimes = new HashMap<>();
-        otherCrimes.put("DESORDENES_PUBLICOS", 1);
-        subtypesByCategoryWithSeverity.put("Otros", otherCrimes);
-        subtypesByCategoryWithSeverity.put("Delitos contra la propiedad", propertyCrimes);
+        for (Map.Entry<String, Map<String, Object[]>> entry : subtypesByCategoryWithData.entrySet()) {
+            Map<String, Integer> severityMap = new HashMap<>();
+            for (Map.Entry<String, Object[]> subEntry : entry.getValue().entrySet()) {
+                severityMap.put(subEntry.getKey(), (Integer) subEntry.getValue()[1]);
+            }
+            subtypesByCategoryWithSeverity.put(entry.getKey(), severityMap);
+        }
         
         // Configurar listener para cambio de categoría
         categorySpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
@@ -2940,9 +3136,16 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Obtener gravedad del subtipo seleccionado
-            Map<String, Integer> subtypes = subtypesByCategoryWithSeverity.get(category);
-            int severity = subtypes.get(subtype);
+            // **CORRECCIÓN BACKEND**: Obtener código backend y severidad del subtipo seleccionado
+            Map<String, Object[]> subtypeData = subtypesByCategoryWithData.get(category);
+            Object[] data = subtypeData.get(subtype);
+            String backendCode = (String) data[0];  // Código que espera el backend
+            int severity = (Integer) data[1];       // Severidad
+            
+            System.out.println("🎯 ENVIANDO AL BACKEND:");
+            System.out.println("   ├─ Subtipo UI: '" + subtype + "'");
+            System.out.println("   ├─ Código Backend: '" + backendCode + "'");
+            System.out.println("   └─ Severidad: " + severity);
             
             // Deshabilitar botón para evitar múltiples envíos
             positiveButton.setEnabled(false);
@@ -2963,15 +3166,15 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // Crear request para el backend
+                    // **CORRECCIÓN BACKEND**: Usar el código backend correcto
                     CrimeCreateRequest request = new CrimeCreateRequest(
-                            subtype,                    // type
-                            description, // description incluye cuándo ocurrió
+                            backendCode,                // category = código backend (ej: "ROBO_CON_VIOLENCIA")
+                            description,                // description 
                             address,                    // address
                             String.valueOf(location.getLatitude()),     // latitude
                             String.valueOf(location.getLongitude()),    // longitude
-                            userEmail        ,           // reporter
-                            time
+                            userEmail,                  // reporter
+                            time                        // time
                     );
 
                     // Enviar al backend
@@ -3208,6 +3411,159 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * **NUEVO**: Configura datos hardcodeados de crímenes para fallback
+     * Basado en la implementación funcional anterior
+     */
+    private void setupHardcodedCrimeAlerts() {
+        // Limpiar alertas actuales
+        crimeAlerts.clear();
+        
+        System.out.println("🎯 Configurando datos hardcodeados de crímenes como fallback...");
+        System.out.println("📊 Estado de filtros al configurar datos:");
+        System.out.println("   ├─ showStreetCrime: " + showStreetCrime);
+        System.out.println("   └─ showVehicleCrime: " + showVehicleCrime);
+        
+        // ========== DELITOS CONTRA LAS PERSONAS ==========
+        // Alertas de crímenes contra transeúntes en la vía pública
+        
+        // Alerta 1: Av. Corrientes 300 - Robo con arma (Grave)
+        CrimeAlert alert1 = new CrimeAlert(
+                1001, // ID hardcodeado
+                "Robo a mano armada",
+                "Se reportó un robo a mano armada en esta zona. El incidente ocurrió en horario nocturno cuando la víctima caminaba sola.",
+                "Av. Corrientes 300, Buenos Aires, Argentina",
+                "Hace 2 días",
+                "Crimen en vía pública", // crimeType correcto
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                3, // Grave
+                "usuario.ejemplo@mail.com",
+                5, // 5 verificaciones
+                "CONFIRMADO"
+        );
+        alert1.location = new GeoPoint(-34.6037, -58.3816); // Coordenadas directas para evitar geocoding
+        crimeAlerts.add(alert1);
+
+        // Alerta 2: Av. Corrientes 600 - Robo de pertenencias (Moderado)
+        CrimeAlert alert2 = new CrimeAlert(
+                1002,
+                "Robo de pertenencias",
+                "Robo de celular y billetera reportado por transeúntes. Los delincuentes escaparon en motocicleta.",
+                "Av. Corrientes 600, Buenos Aires, Argentina",
+                "Hace 1 semana",
+                "Crimen en vía pública", // crimeType correcto
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2, // Moderado
+                "testeo@gmail.com",
+                3,
+                "CONFIRMADO"
+        );
+        alert2.location = new GeoPoint(-34.6035, -58.3820);
+        crimeAlerts.add(alert2);
+
+        // Alerta 3: Florida 300 - Arrebato (Moderado)
+        CrimeAlert alert3 = new CrimeAlert(
+                1003,
+                "Arrebato de cartera",
+                "Arrebato de cartera en la zona peatonal durante el horario comercial. La víctima reportó que fueron dos personas en bicicleta.",
+                "Florida 300, Buenos Aires, Argentina",
+                "Hace 3 días",
+                "Crimen en vía pública", // crimeType correcto
+                "Delitos contra las personas",
+                "Robo/Arrebato",
+                2, // Moderado
+                "seguridad@ciudad.gov.ar",
+                8,
+                "CONFIRMADO"
+        );
+        alert3.location = new GeoPoint(-34.6010, -58.3750);
+        crimeAlerts.add(alert3);
+
+        // Alerta 4: Hurto leve (Leve)
+        CrimeAlert alert4 = new CrimeAlert(
+                1004,
+                "Hurto por distracción",
+                "Hurto de billetera mediante distracción en zona comercial. Los delincuentes operaban en grupo fingiendo ser compradores.",
+                "Lavalle 600, Buenos Aires, Argentina",
+                "Hace 5 días",
+                "Crimen en vía pública", // crimeType correcto
+                "Delitos contra las personas",
+                "Hurto",
+                1, // Leve
+                "comerciante@zona.com",
+                2,
+                "PENDIENTE"
+        );
+        alert4.location = new GeoPoint(-34.6005, -58.3755);
+        crimeAlerts.add(alert4);
+
+        // ========== DELITOS CONTRA LA PROPIEDAD (VEHÍCULOS) ==========
+
+        // Robo de vehículo 1: Muy grave
+        CrimeAlert vehicleAlert1 = new CrimeAlert(
+                1005,
+                "Robo de automóvil",
+                "Robo de vehículo Toyota Corolla blanco en estacionamiento. Los delincuentes forzaron la cerradura y se llevaron el auto en menos de 3 minutos.",
+                "Av. Corrientes 450, Buenos Aires, Argentina",
+                "Hace 6 horas",
+                "Robo de vehículos", // crimeType correcto para filtros
+                "Delitos contra la propiedad",
+                "Robo de vehículo estacionado",
+                4, // Muy grave
+                "propietario@vehiculo.com",
+                12,
+                "CONFIRMADO"
+        );
+        vehicleAlert1.location = new GeoPoint(-34.6038, -58.3818);
+        crimeAlerts.add(vehicleAlert1);
+
+        // Robo de vehículo 2: Grave
+        CrimeAlert vehicleAlert2 = new CrimeAlert(
+                1006,
+                "Robo de motocicleta",
+                "Robo de motocicleta Honda en la vía pública. Dos personas intimidaron al conductor y se llevaron el vehículo.",
+                "Av. Santa Fe 700, Buenos Aires, Argentina",
+                "Hace 1 día",
+                "Robo de vehículos", // crimeType correcto para filtros
+                "Delitos contra la propiedad",
+                "Robo de vehículo en movimiento",
+                3, // Grave
+                "motorista@delivery.com",
+                7,
+                "CONFIRMADO"
+        );
+        vehicleAlert2.location = new GeoPoint(-34.5952, -58.3785);
+        crimeAlerts.add(vehicleAlert2);
+
+        // Robo de bicicleta (Moderado)
+        CrimeAlert bikeAlert = new CrimeAlert(
+                1007,
+                "Robo de bicicleta",
+                "Robo de bicicleta de alta gama que estaba asegurada con cadena. Los delincuentes cortaron la cadena con herramientas.",
+                "Plaza San Martín, Buenos Aires, Argentina",
+                "Hace 3 días",
+                "Robo de vehículos", // crimeType correcto para filtros
+                "Delitos contra la propiedad",
+                "Robo de bicicleta",
+                2, // Moderado
+                "ciclista@urbano.com",
+                4,
+                "CONFIRMADO"
+        );
+        bikeAlert.location = new GeoPoint(-34.5975, -58.3756);
+        crimeAlerts.add(bikeAlert);
+
+        System.out.println("✅ Configurados " + crimeAlerts.size() + " crímenes hardcodeados con diferentes severidades");
+        
+        // **DEBUGGING**: Imprimir todos los crímenes configurados
+        for (int i = 0; i < crimeAlerts.size(); i++) {
+            CrimeAlert alert = crimeAlerts.get(i);
+            System.out.println("   " + (i+1) + ". " + alert.title + " | Tipo: '" + alert.crimeType + "' | Categoría: '" + alert.category + "'");
+        }
+    }
+
     // ★★★ MÉTODOS PARA FILTROS DE CRIMEN ★★★
 
     private void toggleStreetCrimeFilter() {
@@ -3237,15 +3593,18 @@ public class MainActivity extends AppCompatActivity {
             showVehicleCrime ? Color.parseColor("#9C27B0") : Color.parseColor("#CCCCCC")));
     }
     
+    /**
+     * **MEJORADO**: Refresca la visualización de crímenes usando la nueva lógica
+     */
     private void refreshCrimeDisplay() {
-        // Limpiar overlays existentes de crímenes
-        map.getOverlays().removeIf(overlay -> overlay instanceof Marker && 
-            ((Marker) overlay).getTitle() != null && 
-            (((Marker) overlay).getTitle().contains("ALERTA:") || 
-             ((Marker) overlay).getTitle().contains("ROBO:")));
+        System.out.println("🔄 Refrescando display de crímenes - Calles: " + showStreetCrime + ", Vehículos: " + showVehicleCrime);
         
-        // Limpiar zonas de peligro existentes
-        map.getOverlays().removeIf(overlay -> overlay instanceof Polygon);
+        // **MEJORADO**: Limpiar marcadores de crímenes existentes usando la lista de seguimiento
+        map.getOverlays().removeAll(crimeAlertMarkers);
+        crimeAlertMarkers.clear();
+        
+        // **MEJORADO**: Limpiar zonas de peligro existentes usando la lista de seguimiento
+        hideDangerZones();
         
         // PRIMERO: Agregar zonas de peligro (círculos) - van al fondo
         if (showStreetCrime || showVehicleCrime) {
@@ -3256,55 +3615,110 @@ public class MainActivity extends AppCompatActivity {
         addFilteredCrimeAlertsToMap();
 
         map.invalidate(); // Refrescar el mapa
+        
+        // **DEBUG**: Mostrar estadísticas
+        int visibleCrimes = 0;
+        for (CrimeAlert alert : crimeAlerts) {
+            if (alert.location != null && shouldShowCrime(alert)) {
+                visibleCrimes++;
+            }
+        }
+        System.out.println("📊 Crímenes visibles después del filtro: " + visibleCrimes + "/" + crimeAlerts.size());
     }
     
+    /**
+     * **MEJORADO**: Agrega marcadores filtrados usando la nueva lógica de marcadores mejorados
+     */
     private void addFilteredCrimeAlertsToMap() {
         for (CrimeAlert alert : crimeAlerts) {
             if (alert.location == null) continue;
             
-            boolean shouldShow = false;
-            if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
-                shouldShow = true;
-            } else if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
-                shouldShow = true;
-            }
+            boolean shouldShow = shouldShowCrime(alert);
             
             if (shouldShow) {
-                Marker marker = new Marker(map);
-                marker.setPosition(alert.location);
+                // **CORRECCIÓN CRÍTICA**: Determinar isActive basándose SOLO en el estado del crimen
+                boolean isActive = "CONFIRMADO".equals(alert.status);
                 
-                if ("Crimen en vía pública".equals(alert.crimeType)) {
-                    marker.setTitle("ALERTA: " + alert.title);
-                    marker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_alert_warning));
-                } else if ("Robo de vehículos".equals(alert.crimeType)) {
-                    marker.setTitle("ROBO: " + alert.title);
-                    marker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_alert_warning));
-                }
-                
-                marker.setSnippet(alert.description + " - " + alert.timeAgo);
-                marker.setOnMarkerClickListener((selectedMarker, mapView) -> {
-                    showCrimeAlertDialog(alert);
-                    return true;
-                });
-                
+                // **USAR EL NUEVO MÉTODO MEJORADO** con el estado correcto
+                Marker marker = createCrimeMarker(alert, isActive);
                 map.getOverlays().add(marker);
+                crimeAlertMarkers.add(marker);
+                
+                // Agregar animación de rebote
+                startCrimeAlertAnimation(marker);
             }
         }
     }
+
+    /**
+     * **NUEVO**: Determina si un crimen involucra vehículos basándose en la descripción y código
+     */
+    private boolean isVehicleRelatedCrime(String description, String crimeCode) {
+        if (description == null) return false;
+        
+        String descLower = description.toLowerCase();
+        
+        // Palabras clave que indican crimen de vehículos
+        boolean hasVehicleKeywords = descLower.contains("vehículo") ||
+                                   descLower.contains("vehiculo") ||
+                                   descLower.contains("auto") ||
+                                   descLower.contains("carro") ||
+                                   descLower.contains("coche") ||
+                                   descLower.contains("moto") ||
+                                   descLower.contains("motocicleta") ||
+                                   descLower.contains("bicicleta") ||
+                                   descLower.contains("scooter") ||
+                                   descLower.contains("camioneta") ||
+                                   descLower.contains("taxi") ||
+                                   descLower.contains("uber") ||
+                                   descLower.contains("estacionamiento") ||
+                                   descLower.contains("garage");
+        
+        System.out.println("🚗 Análisis de vehículo para '" + crimeCode + "':");
+        System.out.println("   ├─ Descripción: '" + description + "'");
+        System.out.println("   └─ Es vehículo: " + hasVehicleKeywords);
+        
+        return hasVehicleKeywords;
+    }
+
+    /**
+     * **CORREGIDO**: Método para determinar si un crimen debe mostrarse según los filtros actuales
+     * Usa la MISMA lógica que la implementación funcional original
+     */
+    private boolean shouldShowCrime(CrimeAlert alert) {
+        // **DEBUG LOGS**
+        System.out.println("🔍 Evaluando crimen: '" + alert.title + "'");
+        System.out.println("   ├─ crimeType: '" + alert.crimeType + "'");
+        System.out.println("   ├─ category: '" + alert.category + "'");
+        System.out.println("   ├─ showVehicleCrime: " + showVehicleCrime);
+        System.out.println("   └─ showStreetCrime: " + showStreetCrime);
+        
+        // **LÓGICA ORIGINAL RESTAURADA**: Usar crimeType exactamente como en "trabajo final bien hecho"
+        boolean result = false;
+        if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
+            result = true;
+            System.out.println("   ✅ MOSTRAR (Robo de vehículos)");
+        } else if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
+            result = true;
+            System.out.println("   ✅ MOSTRAR (Crimen en vía pública)");
+        } else {
+            System.out.println("   ❌ OCULTAR (No coincide con filtros)");
+        }
+        
+        return result;
+    }
     
+    /**
+     * **MEJORADO**: Crea zonas de peligro filtradas usando la nueva lógica de severidad
+     */
     private void createFilteredDangerZones() {
         for (CrimeAlert alert : crimeAlerts) {
             if (alert.location == null) continue;
             
-            boolean shouldShow = false;
-            if ("Crimen en vía pública".equals(alert.crimeType) && showStreetCrime) {
-                shouldShow = true;
-            } else if ("Robo de vehículos".equals(alert.crimeType) && showVehicleCrime) {
-                shouldShow = true;
-            }
+            boolean shouldShow = shouldShowCrime(alert);
             
             if (shouldShow) {
-                // Usar la nueva función que considera la gravedad
+                // **USAR LA FUNCIÓN MEJORADA** que considera la gravedad y crea zonas diferenciadas
                 createDangerZone(alert.location, alert.severity);
             }
         }
@@ -3320,6 +3734,90 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         map.onPause();
+    }
+
+    // ================================
+    // SISTEMA DE PUNTOS Y LOGROS
+    // ================================
+    
+    /**
+     * Verifica recompensas solo después de una verificación exitosa
+     * Evita llamadas innecesarias al backend
+     */
+    private void checkUserRewardsAfterVerification() {
+        String userEmail = UserSession.getCurrentUserMail();
+        if (userEmail == null) return;
+
+        UserMailRequest request = new UserMailRequest(userEmail);
+        ApiClient.getService().getUsuario(request).enqueue(new Callback<List<UserResponse>>() {
+            @Override
+            public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    UserResponse user = response.body().get(0);
+                    
+                    // Solo mostrar notificación si los puntos cambiaron
+                    if (user.points > lastKnownPoints) {
+                        int pointsGained = user.points - lastKnownPoints;
+                        showPointsNotification(pointsGained);
+                        lastKnownPoints = user.points;
+                    }
+                    
+                    // Verificar logros desbloqueados
+                    checkForNewAchievements(user);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserResponse>> call, Throwable t) {
+                // Silenciar errores de red para no molestar al usuario
+            }
+        });
+    }
+
+    /**
+     * Muestra notificación de puntos ganados
+     */
+    private void showPointsNotification(int pointsGained) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, 
+                "🎉 +" + pointsGained + " puntos ganados!", 
+                Toast.LENGTH_LONG).show();
+        });
+    }
+
+    /**
+     * Verifica logros basándose en la estructura del backend:
+     * CONFIRMATION: 3, 10, 20 reportes confirmados
+     * VALIDATION: 15, 50, 100 validaciones
+     */
+    private void checkForNewAchievements(UserResponse user) {
+        if (user.achievements == null) return;
+        
+        // Verificar si hay nuevos logros comparando con el último estado conocido
+        // Por simplicidad, mostrar notificación de los últimos logros obtenidos
+        for (Logro achievement : user.achievements) {
+            // Solo mostrar los más recientes basados en el progreso actual
+            if (achievement.category.equals("CONFIRMATION")) {
+                if (user.confirmedReports == achievement.requirements) {
+                    showAchievementUnlocked(achievement.name, "¡Tienes " + achievement.requirements + " reportes confirmados!");
+                }
+            } else if (achievement.category.equals("VALIDATION")) {
+                if (user.validations == achievement.requirements) {
+                    showAchievementUnlocked(achievement.name, "¡Realizaste " + achievement.requirements + " verificaciones!");
+                }
+            }
+        }
+    }
+
+    /**
+     * Muestra notificación de logro desbloqueado
+     */
+    private void showAchievementUnlocked(String achievementName, String description) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, 
+                "🏆 LOGRO DESBLOQUEADO: " + achievementName + "\n" + description, 
+                Toast.LENGTH_LONG).show();
+        });
     }
 }
 
