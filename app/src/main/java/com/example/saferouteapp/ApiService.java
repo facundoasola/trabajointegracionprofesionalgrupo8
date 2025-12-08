@@ -17,7 +17,7 @@ public interface ApiService {
     Call<UserResponse> register(@Body RegisterRequest request);
 
     @POST("api/usuarios")
-    Call<UserResponse> getUsuario(@Body UserMailRequest request);
+    Call<List<UserResponse>> getUsuario(@Body UserMailRequest request);
 
     @POST("api/crimenes")
     Call<List<CrimeDto>> getCrimenes(@Body HashMap<String, String> request);

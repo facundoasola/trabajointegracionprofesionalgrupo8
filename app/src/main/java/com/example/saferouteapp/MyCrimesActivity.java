@@ -116,17 +116,17 @@ public class MyCrimesActivity extends AppCompatActivity {
 
         UserMailRequest request = new UserMailRequest(userEmail);
 
-        ApiClient.getService().getUsuario(request).enqueue(new Callback<UserResponse>() {
+        ApiClient.getService().getUsuario(request).enqueue(new Callback<List<UserResponse>>() {
             @Override
-            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    UserResponse updatedUser = response.body();
+            public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    UserResponse updatedUser = response.body().get(0);
                     UserSession.setCurrentUser(updatedUser);
                 }
             }
 
             @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
+            public void onFailure(Call<List<UserResponse>> call, Throwable t) {
                 // Silently fail - no interrumpir la experiencia del usuario
             }
         });
